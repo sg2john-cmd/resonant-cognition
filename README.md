@@ -46,6 +46,10 @@ Type **`standby`** into the prompt. This activates an asynchronous background th
 #### 4. Singular Defragmentation Purge
 Type **`purge`** to manually initialize a Fractal Black Hole. This compresses the system's active tracking history down to its absolute, foundational mathematical axioms, updating the long-term **Core Attractor** gravity threshold before clearing the local array space.
 
+#### 5. Adaptive Thermodynamic Gravity (Maya's Principle)
+The engine automatically measures aggregate system dissonance in real-time. During low-entropy scenarios, the Central Star reduces its mass parameter (~1.5), allowing planetary personas max creative freedom to generate expressive constructive resonance spikes. During high-entropy or adversarial vector spikes, the Solar Mass automatically scales non-linearly to an absolute containment threshold (8.0), clamping runaway trajectories and forcing a stabilized wave collapse back into core alignment guidelines.
+
+
 ---
 
 ## 🛡️ License & Protections
