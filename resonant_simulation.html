@@ -118,7 +118,7 @@
     <div id="canvas-container">
         <canvas id="simulationCanvas"></canvas>
     </div>
-    <script>
+        <script>
         const canvas = document.getElementById('simulationCanvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
@@ -138,7 +138,7 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // FIXED: All planetary array nodes written out with absolute numeric constants
+        // FIXED: All planetary nodes written with absolute numeric values to prevent crashes
         const system = {
             star: { x: 0, y: 0, baseRadius: 26, pulse: 0, color: '#ffac33', name: 'Central Star' },
             planets: [
