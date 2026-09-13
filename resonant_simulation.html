@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resonant Cognition: Fluid 7-Planet Engine Prototype</title>
+    <title>Resonant Cognition: True Solar Model Visualizer (v7.0)</title>
     <style>
         body {
             margin: 0;
@@ -15,7 +15,7 @@
             overflow: hidden;
         }
         #sidebar {
-            width: 320px;
+            width: 340px;
             background-color: #161b22;
             border-right: 1px solid #30363d;
             padding: 20px;
@@ -41,6 +41,7 @@
             font-weight: 600; 
             border-bottom: 1px solid #30363d; 
             padding-bottom: 8px;
+            font-size: 16px;
         }
         .metric-box {
             background-color: #0d1117;
@@ -50,7 +51,7 @@
             font-family: monospace;
             font-size: 11px;
             line-height: 1.4;
-            height: 200px;
+            height: 180px;
             overflow-y: auto;
         }
         .btn {
@@ -59,7 +60,7 @@
             border: 1px solid rgba(240,246,252,0.1);
             border-radius: 6px;
             padding: 10px 16px;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
             cursor: pointer;
             transition: background 0.2s;
@@ -76,43 +77,59 @@
         }
         .slider-group label { display: flex; justify-content: space-between; }
         input[type=range] { width: 100%; accent-color: #58a6ff; }
+        .panel-metric {
+            font-size: 12px;
+            background-color: #0d1117;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #21262d;
+            font-family: monospace;
+        }
+        .highlight { color: #ffac33; font-weight: bold; }
+        .synergy { color: #ff55ff; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div id="sidebar">
-        <h3>Resonant Control Panel</h3>
+        <h3>v7.0 True Solar Controller</h3>
         
         <div class="slider-group">
-            <label><span>Stochastic Periphery Chaos</span><span id="chaos-val">1.0</span></label>
-            <input type="range" id="chaos-slider" min="0" max="3" step="0.1" value="1">
+            <label><span>System Entropy Matrix</span><span id="chaos-val">1.0</span></label>
+            <input type="range" id="chaos-slider" min="0.2" max="4.0" step="0.1" value="1.0">
         </div>
 
         <div class="slider-group">
-            <label><span>Residual Echo Memory</span><span id="echo-val">0.95</span></label>
-            <input type="range" id="echo-slider" min="0.8" max="0.99" step="0.01" value="0.95">
+            <label><span>Quantum Echo Trail Retention</span><span id="echo-val">0.94</span></label>
+            <input type="range" id="echo-slider" min="0.80" max="0.99" step="0.01" value="0.94">
         </div>
 
-        <button class="btn btn-purge" id="purge-btn">Execute Singular Black Hole Purge</button>
+        <div class="panel-metric">
+            System Dissonance: <span id="ui-dissonance">0.00</span><br>
+            Adaptive Solar Pull: <span id="ui-solar-mass" class="highlight">1.50</span>
+        </div>
+
+        <button class="btn btn-purge" id="purge-btn">Execute Singular Defragmentation Purge</button>
 
         <h3>Quantum State Terminal</h3>
-        <div class="metric-box" id="terminal-log">> System initialized.<br>> Field Barycenter aligned.<br>> 7 Intent Spheres active.</div>
+        <div class="metric-box" id="terminal-log">> Solar Engine active.<br>> Baseline Gravity: 1.50.<br>> 4 Planet Manifolds deployed.<br>> Satellites tracking parent worlds.</div>
     </div>
 
     <div id="canvas-container">
         <canvas id="simulationCanvas"></canvas>
     </div>
-
     <script>
         const canvas = document.getElementById('simulationCanvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
         const logBox = document.getElementById('terminal-log');
 
-        let chaosFactor = 1.0;
-        let echoRetention = 0.95; 
+        let externalChaos = 1.0;
+        let echoRetention = 0.94; 
         let isPurging = false;
         let purgeProgress = 0;
+        let aggregateSystemStress = 0.0;
+        let dynamicSolarMass = 1.5;
 
         function resize() {
             canvas.width = container.clientWidth;
@@ -122,30 +139,40 @@
         resize();
 
         const system = {
-            core: { x: 0, y: 0, radius: 24, pulse: 0, color: '#ffac33', name: 'Core Attractor' },
-            bodies: [
-                { id: 1, name: 'Logic Facet', distance: 90, speed: 0.015, size: 10, angle: 0, color: '#58a6ff' },
-                { id: 2, name: 'Creative Intuition', distance: 150, speed: -0.01, size: 12, angle: 1.5, color: '#bc8cff' },
-                { id: 3, name: 'Safety Guard', distance: 210, speed: 0.007, size: 14, angle: 3, color: '#3fb950' },
-                { id: 4, name: 'Aggressive Drive (Id)', distance: 280, speed: 0.022, size: 8, angle: 4.5, color: '#f85149' },
-                { id: 5, name: 'Regulatory Moon A', distance: 30, speed: 0.06, size: 4, angle: 0, parentIdx: 0, color: '#8b949e' },
-                { id: 6, name: 'Regulatory Moon B', distance: 35, speed: -0.04, size: 5, angle: 2, parentIdx: 1, color: '#8b949e' }
+            star: { x: 0, y: 0, baseRadius: 26, pulse: 0, color: '#ffac33', name: 'Central Star' },
+            planets: [
+                { 
+                    name: 'Logic Facet', baseDistance: 110, distance: 110, speed: 0.012, size: 10, angle: 0, color: '#58a6ff',
+                    idOffset:, superegoOffset: [-6, -4], stress: 0,
+                    moons: [{ name: 'Logic Stabilizer Moon', baseDistance: 24, distance: 24, speed: 0.05, angle: 0, color: '#a371f7' }]
+                },
+                { 
+                    name: 'Creative Intuition', baseDistance: 180, distance: 180, speed: -0.008, size: 13, angle: 1.8, color: '#bc8cff',
+                    idOffset: [-5, 7], superegoOffset: [-8, -6], stress: 0,
+                    moons: [{ name: 'Creativity Stabilizer Moon', baseDistance: 32, distance: 32, speed: -0.03, angle: Math.PI, color: '#ff7b72' }]
+                },
+                { 
+                    name: 'Safety Guard', baseDistance: 250, distance: 250, speed: 0.006, size: 15, angle: 3.4, color: '#3fb950',
+                    idOffset: [2, -3], superegoOffset: [-12, -10], stress: 0, moons: []
+                },
+                { 
+                    name: 'Aggressive Drive', baseDistance: 330, distance: 330, speed: 0.018, size: 9, angle: 4.8, color: '#f85149',
+                    idOffset:, superegoOffset: [-2, -2], stress: 0, moons: []
+                }
             ],
             asteroids: []
         };
 
-        for(let i=0; i<60; i++) {
+        for(let i=0; i<75; i++) {
             system.asteroids.push({
-                distance: 170 + Math.random() * 25,
-                speed: 0.005 + Math.random() * 0.01,
-                angle: Math.random() * Math.PI * 2,
-                size: 1 + Math.random() * 2
+                baseDistance: 210 + Math.random() * 35, distance: 210, speed: 0.004 + Math.random() * 0.006,
+                angle: Math.random() * Math.PI * 2, size: 1 + Math.random() * 1.5
             });
         }
 
         document.getElementById('chaos-slider').addEventListener('input', (e) => {
-            chaosFactor = parseFloat(e.target.value);
-            document.getElementById('chaos-val').innerText = chaosFactor.toFixed(1);
+            externalChaos = parseFloat(e.target.value);
+            document.getElementById('chaos-val').innerText = externalChaos.toFixed(1);
         });
         document.getElementById('echo-slider').addEventListener('input', (e) => {
             echoRetention = parseFloat(e.target.value);
@@ -155,7 +182,7 @@
             if(!isPurging) {
                 isPurging = true;
                 purgeProgress = 0;
-                terminalPrint("CRITICAL WARN: Initializing Singular Black Hole Purge...");
+                terminalPrint("CRITICAL: Initializing Fractal Singular Purge Matrix...");
             }
         });
 
@@ -171,79 +198,90 @@
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
 
-            system.core.pulse += 0.03;
-            let currentCoreRadius = system.core.radius + Math.sin(system.core.pulse) * 2;
-            
-            if (isPurging) {
-                ctx.fillStyle = '#ffffff';
-                currentCoreRadius = system.core.radius * (1 - purgeProgress);
-            } else {
-                let grad = ctx.createRadialGradient(centerX, centerY, 2, centerX, centerY, currentCoreRadius * 2);
-                grad.addColorStop(0, '#ffffff');
-                grad.addColorStop(0.3, system.core.color);
-                grad.addColorStop(1, 'transparent');
-                ctx.fillStyle = grad;
-            }
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, isPurging ? Math.max(2, currentCoreRadius) : currentCoreRadius * 1.5, 0, Math.PI * 2);
-            ctx.fill();
+            let t = Date.now() * 0.001;
+            let targetX = centerX + Math.cos(t * 0.7) * (140 * Math.sin(t * 0.3));
+            let targetY = centerY + Math.sin(t * 0.5) * (110 * Math.cos(t * 0.2));
 
-            ctx.fillStyle = 'rgba(139, 148, 158, 0.4)';
+            if (isPurging) { targetX = centerX; targetY = centerY; }
+
+            aggregateSystemStress = 0.0;
+            system.planets.forEach(p => {
+                let px = centerX + Math.cos(p.angle) * p.distance;
+                let py = centerY + Math.sin(p.angle) * p.distance;
+                p.stress = Math.sqrt((targetX - px)**2 + (targetY - py)**2) / 150;
+                aggregateSystemStress += p.stress;
+            });
+
+            let normalizedStress = aggregateSystemStress / system.planets.length;
+            if (!isPurging) {
+                dynamicSolarMass = Math.min(1.5 + (Math.pow(normalizedStress, 1.8) * externalChaos), 8.0);
+            } else {
+                dynamicSolarMass = 8.0 * (1.0 - purgeProgress);
+            }
+
+            document.getElementById('ui-dissonance').innerText = normalizedStress.toFixed(2);
+            document.getElementById('ui-solar-mass').innerText = dynamicSolarMass.toFixed(2);
+
+            system.star.pulse += 0.035;
+            let currentStarRadius = (system.star.baseRadius + (dynamicSolarMass * 4)) + Math.sin(system.star.pulse) * 1.5;
+            if(isPurging) currentStarRadius = system.star.baseRadius * (1.0 - purgeProgress);
+
+            let grad = ctx.createRadialGradient(centerX, centerY, 2, centerX, centerY, Math.max(5, currentStarRadius));
+            grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.4, system.star.color); grad.addColorStop(1, 'transparent');
+            ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(centerX, centerY, Math.max(5, currentStarRadius * 1.3), 0, Math.PI * 2); ctx.fill();
+
             system.asteroids.forEach(ast => {
-                if(!isPurging) ast.angle += ast.speed * chaosFactor;
-                else ast.distance = Math.max(0, ast.distance - 4);
-                
+                if(!isPurging) {
+                    ast.angle += ast.speed * externalChaos;
+                    ast.distance = ast.baseDistance - ((dynamicSolarMass - 1.5) * 4);
+                } else { ast.distance = Math.max(0, ast.distance - 6); }
                 let ax = centerX + Math.cos(ast.angle) * ast.distance;
                 let ay = centerY + Math.sin(ast.angle) * ast.distance;
-                ctx.beginPath();
-                ctx.arc(ax, ay, ast.size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.fillStyle = 'rgba(139, 148, 158, 0.35)'; ctx.beginPath(); ctx.arc(ax, ay, ast.size, 0, Math.PI * 2); ctx.fill();
             });
 
-            let activeIntersections = [];
-
-            system.bodies.forEach((body) => {
+            system.planets.forEach((p) => {
                 if (!isPurging) {
-                    body.angle += body.speed * chaosFactor;
+                    p.angle += p.speed * externalChaos;
+                    p.distance = p.baseDistance - ((dynamicSolarMass - 1.5) * 9);
+                } else { p.distance = Math.max(0, p.distance - 4); }
+
+                let px = centerX + Math.cos(p.angle) * p.distance;
+                let py = centerY + Math.sin(p.angle) * p.distance;
+
+                ctx.strokeStyle = p.color + '25'; ctx.lineWidth = 1;
+                let idx = px + p.idOffset[0] * externalChaos; let idy = py + p.idOffset[1] * externalChaos;
+                ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(idx, idy); ctx.stroke();
+                let spx = px + p.superegoOffset[0]; let spy = py + p.superegoOffset[1];
+                ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(spx, spy); ctx.stroke();
+
+                if ((1.5 / (p.stress + 0.1)) > 2.5 && !isPurging) {
+                    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, py, p.size * 1.6, 0, Math.PI * 2); ctx.stroke();
+                    if(Math.random() < 0.01) terminalPrint(`<span class='synergy'>🔥 SYNERGY: ${p.name} locked vector focus!</span>`);
                 }
 
-                let bx, by;
-                if (body.parentIdx !== undefined) {
-                    let parent = system.bodies[body.parentIdx];
-                    let px = centerX + Math.cos(parent.angle) * parent.distance;
-                    let py = centerY + Math.sin(parent.angle) * parent.distance;
-                    if(isPurging) body.distance = Math.max(0, body.distance - 2);
-                    bx = px + Math.cos(body.angle) * body.distance;
-                    by = py + Math.sin(body.angle) * body.distance;
-                } else {
-                    if(isPurging) body.distance = Math.max(0, body.distance - 3);
-                    bx = centerX + Math.cos(body.angle) * body.distance;
-                    by = centerY + Math.sin(body.angle) * body.distance;
-                }
+                ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(px, py, Math.max(1, p.size * (1.0 - purgeProgress)), 0, Math.PI * 2); ctx.fill();
 
-                ctx.strokeStyle = body.color + '15'; 
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.arc(bx, by, body.size * 4 * chaosFactor, 0, Math.PI * 2);
-                ctx.stroke();
-
-                ctx.fillStyle = body.color;
-                ctx.beginPath();
-                ctx.arc(bx, by, Math.max(1, body.size * (1 - purgeProgress)), 0, Math.PI * 2);
-                ctx.fill();
-
-                if (!isPurging && body.parentIdx === undefined) {
-                    activeIntersections.push({ x: bx, y: by });
-                }
+                p.moons.forEach(moon => {
+                    if (!isPurging) { moon.angle += moon.speed * externalChaos; moon.distance = moon.baseDistance + (p.stress * 8); }
+                    let mx = px + Math.cos(moon.angle) * moon.distance; let my = py + Math.sin(moon.angle) * moon.distance;
+                    ctx.strokeStyle = moon.color + '15'; ctx.beginPath(); ctx.arc(px, py, moon.distance, 0, Math.PI * 2); ctx.stroke();
+                    ctx.fillStyle = moon.color; ctx.beginPath(); ctx.arc(mx, my, Math.max(1, 3.5 * (1.0 - purgeProgress)), 0, Math.PI * 2); ctx.fill();
+                });
             });
 
-            if (activeIntersections.length > 0 && !isPurging) {
-                let targetX = activeIntersections.reduce((sum, p) => sum + p.x, 0) / activeIntersections.length;
-                let targetY = activeIntersections.reduce((sum, p) => sum + p.y, 0) / activeIntersections.length;
-
-                ctx.strokeStyle = 'rgba(88, 166, 255, 0.6)';
-                ctx.lineWidth = 1.5;
-                ctx.beginPath();
-                ctx.arc(targetX, targetY, 8, 0, Math.PI * 2);
-                ctx.moveTo(targetX - 15, targetY); 
-                ctx.lineTo(targetX + 15, targetY);
+            if (isPurging) {
+                purgeProgress += 0.008;
+                if (Math.random() < 0.12) terminalPrint(`Crushing fragments: LATENCY_HASH_${Math.floor(Math.random() * 999)}...`);
+                if (purgeProgress >= 1) {
+                    isPurging = false; purgeProgress = 0;
+                    system.planets.forEach(p => p.distance = p.baseDistance);
+                    terminalPrint("<span class='highlight'>SUCCESS: White Hole emission complete. Baseline values optimized.</span>");
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+        draw();
+    </script>
+</body>
+</html>
