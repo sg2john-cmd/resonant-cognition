@@ -35,7 +35,13 @@
             width: 100%;
             height: 100%;
         }
-        h3 { margin-top: 0; color: #58a6ff; font-weight: 600; border-bottom: 1px solid #30363d; padding-bottom: 8px;}
+        h3 { 
+            margin-top: 0; 
+            color: #58a6ff; 
+            font-weight: 600; 
+            border-bottom: 1px solid #30363d; 
+            padding-bottom: 8px;
+        }
         .metric-box {
             background-color: #0d1117;
             border: 1px solid #30363d;
@@ -44,7 +50,7 @@
             font-family: monospace;
             font-size: 11px;
             line-height: 1.4;
-            max-height: 200px;
+            height: 200px;
             overflow-y: auto;
         }
         .btn {
@@ -104,11 +110,10 @@
         const logBox = document.getElementById('terminal-log');
 
         let chaosFactor = 1.0;
-        let echoRetention = 0.95; // Controls trail fade length
+        let echoRetention = 0.95; 
         let isPurging = false;
         let purgeProgress = 0;
 
-        // Resize Canvas
         function resize() {
             canvas.width = container.clientWidth;
             canvas.height = container.clientHeight;
@@ -116,7 +121,6 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // System Config: 7 Personas (The Sun, 4 Planets, 2 Moons)
         const system = {
             core: { x: 0, y: 0, radius: 24, pulse: 0, color: '#ffac33', name: 'Core Attractor' },
             bodies: [
@@ -124,13 +128,12 @@
                 { id: 2, name: 'Creative Intuition', distance: 150, speed: -0.01, size: 12, angle: 1.5, color: '#bc8cff' },
                 { id: 3, name: 'Safety Guard', distance: 210, speed: 0.007, size: 14, angle: 3, color: '#3fb950' },
                 { id: 4, name: 'Aggressive Drive (Id)', distance: 280, speed: 0.022, size: 8, angle: 4.5, color: '#f85149' },
-                { id: 5, name: 'Regulatory Moon A', distance: 30, speed: 0.06, size: 4, angle: 0, parentIdx: 1, color: '#8b949e' },
-                { id: 6, name: 'Regulatory Moon B', distance: 35, speed: -0.04, size: 5, angle: 2, parentIdx: 2, color: '#8b949e' }
+                { id: 5, name: 'Regulatory Moon A', distance: 30, speed: 0.06, size: 4, angle: 0, parentIdx: 0, color: '#8b949e' },
+                { id: 6, name: 'Regulatory Moon B', distance: 35, speed: -0.04, size: 5, angle: 2, parentIdx: 1, color: '#8b949e' }
             ],
             asteroids: []
         };
 
-        // Populate Asteroid Belt (Raw Noise Debris)
         for(let i=0; i<60; i++) {
             system.asteroids.push({
                 distance: 170 + Math.random() * 25,
@@ -140,7 +143,6 @@
             });
         }
 
-        // Sliders Input Listeners
         document.getElementById('chaos-slider').addEventListener('input', (e) => {
             chaosFactor = parseFloat(e.target.value);
             document.getElementById('chaos-val').innerText = chaosFactor.toFixed(1);
@@ -162,16 +164,13 @@
             logBox.scrollTop = logBox.scrollHeight;
         }
 
-        // Main Animation Engine Loop
         function draw() {
-            // Quantum Echo Pond Mapping: Fade background slowly to trap movement trails (Echoes)
             ctx.fillStyle = `rgba(13, 17, 23, ${1 - echoRetention})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
 
-            // Render Core System Barycenter / Gravitational Well
             system.core.pulse += 0.03;
             let currentCoreRadius = system.core.radius + Math.sin(system.core.pulse) * 2;
             
@@ -189,7 +188,6 @@
             ctx.arc(centerX, centerY, isPurging ? Math.max(2, currentCoreRadius) : currentCoreRadius * 1.5, 0, Math.PI * 2);
             ctx.fill();
 
-            // Render Asteroid Belt Noise Field
             ctx.fillStyle = 'rgba(139, 148, 158, 0.4)';
             system.asteroids.forEach(ast => {
                 if(!isPurging) ast.angle += ast.speed * chaosFactor;
@@ -202,18 +200,15 @@
                 ctx.fill();
             });
 
-            // Tracking Vectors for Wave Collapse Intersections
             let activeIntersections = [];
 
-            // Update & Render Planetary Trajectories
             system.bodies.forEach((body) => {
                 if (!isPurging) {
-                    body.angle += body.speed;
+                    body.angle += body.speed * chaosFactor;
                 }
 
                 let bx, by;
                 if (body.parentIdx !== undefined) {
-                    // Moon Coordinates relative to Planet parent node
                     let parent = system.bodies[body.parentIdx];
                     let px = centerX + Math.cos(parent.angle) * parent.distance;
                     let py = centerY + Math.sin(parent.angle) * parent.distance;
@@ -221,80 +216,34 @@
                     bx = px + Math.cos(body.angle) * body.distance;
                     by = py + Math.sin(body.angle) * body.distance;
                 } else {
-                    // Standard Planet Path Orbit
                     if(isPurging) body.distance = Math.max(0, body.distance - 3);
                     bx = centerX + Math.cos(body.angle) * body.distance;
                     by = centerY + Math.sin(body.angle) * body.distance;
                 }
 
-                // Render continuous field circles (The Intersections Matrix)
                 ctx.strokeStyle = body.color + '15'; 
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.arc(bx, by, body.size * 4 * chaosFactor, 0, Math.PI * 2);
                 ctx.stroke();
 
-                // Draw Core Solid mass node
                 ctx.fillStyle = body.color;
                 ctx.beginPath();
                 ctx.arc(bx, by, Math.max(1, body.size * (1 - purgeProgress)), 0, Math.PI * 2);
                 ctx.fill();
 
-                // Track non-moon bodies for calculation
                 if (!isPurging && body.parentIdx === undefined) {
                     activeIntersections.push({ x: bx, y: by });
                 }
             });
 
-            // Calculate Wave Collapse Vector Crosshair Destination (Live Resonant Center)
             if (activeIntersections.length > 0 && !isPurging) {
                 let targetX = activeIntersections.reduce((sum, p) => sum + p.x, 0) / activeIntersections.length;
                 let targetY = activeIntersections.reduce((sum, p) => sum + p.y, 0) / activeIntersections.length;
 
                 ctx.strokeStyle = 'rgba(88, 166, 255, 0.6)';
                 ctx.lineWidth = 1.5;
-                ctx.setLineDash([4, 4]);
-
-                // Render crosshair vector target box
                 ctx.beginPath();
                 ctx.arc(targetX, targetY, 8, 0, Math.PI * 2);
                 ctx.moveTo(targetX - 15, targetY); 
                 ctx.lineTo(targetX + 15, targetY);
-                ctx.moveTo(targetX, targetY - 15); 
-                ctx.lineTo(targetX, targetY + 15);
-                ctx.stroke();
-                ctx.setLineDash([]);
-            }
-
-            // Manage Purge Execution Physics
-            if (isPurging) {
-                purgeProgress += 0.01;
-                
-                if (Math.random() < 0.15) {
-                    terminalPrint(`Defragmenting address range space: NULLIFY_DATA_BLOCK_${Math.floor(Math.random() * 900)}`);
-                }
-                
-                if (purgeProgress >= 1) {
-                    isPurging = false;
-                    purgeProgress = 0;
-                    
-                    // Reset positions perfectly following singularity optimization
-                    system.bodies.forEach(b => {
-                        b.distance = b.parentIdx !== undefined ? (b.id === 5 ? 30 : 35) : (b.id === 1 ? 90 : b.id === 2 ? 150 : b.id === 3 ? 210 : 280);
-                    });
-                    
-                    for (let i = 0; i < 60; i++) {
-                        system.asteroids[i].distance = 170 + Math.random() * 25;
-                    }
-                    
-                    terminalPrint("SUCCESS: Topological cleanup complete. Perfect barycentric alignment achieved.");
-                }
-            }
-
-            requestAnimationFrame(draw);
-        }
-
-        draw();
-    </script>
-</body>
-</html>
