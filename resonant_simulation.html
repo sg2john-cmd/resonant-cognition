@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resonant Cognition: Live 22-Body Solar Dashboard (v9.0)</title>
+    <title>Resonant Cognition: Live 22-Body Solar Dashboard (v9.1)</title>
     <style>
         body {
             margin: 0;
@@ -116,21 +116,19 @@
 <body>
 
     <div id="sidebar">
-        <h3>v9.0 Live Interactive Core</h3>
+        <h3>v9.1 Live Interactive Core</h3>
         
         <div class="panel-metric">
             <span id="conn-dot" class="status-dot"></span> Link: <span id="conn-status">DISCONNECTED</span><br>
             State: <span id="ui-mode" class="highlight">DORMANT</span>
         </div>
 
-        <!-- 1. Live Input Injection Vector Box Layout -->
         <div class="slider-group">
             <label><span>Inject Vector Sequence to Engine</span></label>
             <input type="text" id="vector-input" placeholder="e.g., 1,0.5,0 | -1,1.5,-0.5">
             <button class="btn btn-active" id="inject-btn" style="margin-top: 4px;">Transmit Stream</button>
         </div>
 
-        <!-- 2. The Temporal Pause/Timeline Controller Layout -->
         <div class="slider-group">
             <label><span>Timeline Speed Warp</span><span id="speed-val">1.0x</span></label>
             <input type="range" id="speed-slider" min="0.1" max="2.0" step="0.1" value="1.0">
@@ -159,6 +157,7 @@
 
 
 
+
         <script>
         const canvas = document.getElementById('simulationCanvas');
         const ctx = canvas.getContext('2d');
@@ -170,8 +169,11 @@
         let timelineRunning = true;
         let simSpeedMultiplier = 1.0;
         
-        let dynamicSolarMass = 1.5;
-        let uiDissonance = 0.0;
+        // Human Eyes Upgrade: Target variables decoupled from active render values to enable smooth interpolation glides
+        let targetSolarMass = 1.5;
+        let currentSolarMass = 1.5;
+        let targetDissonance = 0.0;
+        let currentDissonance = 0.0;
 
         let cometActive = false;
         let cometX = 0, cometY = 0;
@@ -216,9 +218,7 @@
             logBox.scrollTop = logBox.scrollHeight;
         }
 
-        // --- WebSocket Communication Gateway Handshake Loop ---
         function connectLiveAntenna() {
-            // FIXED: Using raw IP string to bypass local sandboxed Firefox security protocols
             const ws = new WebSocket('ws://127.0.0.1:8765');
             globalWebsocketRef = ws;
 
@@ -235,14 +235,16 @@
                 document.getElementById('ui-dissonance').innerText = data.dissonance.toFixed(2);
                 document.getElementById('ui-solar-mass').innerText = data.solar_mass.toFixed(2);
                 
-                dynamicSolarMass = data.solar_mass;
-                uiDissonance = data.dissonance;
+                // Human Eyes Upgrade: Set structural TARGET values, let render loop slowly glide toward them
+                targetSolarMass = data.solar_mass;
+                targetDissonance = data.dissonance;
                 isSleeping = (data.mode === "REM_SLEEP");
 
                 if (data.type === "STIMULUS_EVENT") {
-                    cometActive = true; cometAge = 0;
+                    cometActive = true; cometAge = 0; // Trigger slow fading impact ring
                     cometX = (canvas.width / 2) + data.input_coords * 70;
                     cometY = (canvas.height / 2) + data.input_coords * 70;
+                    
                     terminalPrint(`Stimulus: Vector [${data.input_coords.join(', ')}]`);
                     data.spikes.forEach(s => terminalPrint(`🔥 Synergy: '${s.name}' locked focus!`, 'synergy'));
                 } else if (data.type === "SLEEP_REPLAY_EVENT") {
@@ -267,12 +269,11 @@
 
 
 
-                    // --- Interactive Controller Event Hookups ---
-        document.getElementById('inject-btn').addEventListener('click', () => {
+
+                    document.getElementById('inject-btn').addEventListener('click', () => {
             const txt = document.getElementById('vector-input').value.trim();
             if(!txt) return;
             if(globalWebsocketRef && globalWebsocketRef.readyState === WebSocket.OPEN) {
-                // Transmit input straight down the live pipeline socket right into Python's waiting loop prompt
                 globalWebsocketRef.send(txt);
                 terminalPrint(`Transmitting remote injection stream: ${txt}`);
                 document.getElementById('vector-input').value = "";
@@ -304,27 +305,37 @@
         });
 
         function draw() {
-            // Apply echo retention frames
             ctx.fillStyle = `rgba(13, 17, 23, ${1 - echoRetention})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
 
-            // Handle live incoming data comet tracking markers
+            // Human Eyes Upgrade 1: Linear Interpolation (Glide) smoothly slides data updates over frames
+            let glideFactor = 0.04 * (timelineRunning ? simSpeedMultiplier : 1.0); // 4% position step per frame
+            currentSolarMass += (targetSolarMass - currentSolarMass) * glideFactor;
+            currentDissonance += (targetDissonance - currentDissonance) * glideFactor;
+
+            // Human Eyes Upgrade 2: Persistent Fading Comet Impact Ring
             if (cometActive) {
-                // Comet tracking speeds scale based on your time warp speed configuration selector
-                cometAge += 0.012 * (timelineRunning ? simSpeedMultiplier : 0.0);
+                cometAge += 0.003 * (timelineRunning ? simSpeedMultiplier : 0.0); // Extended lifespan over multiple seconds
                 if (cometAge >= 1.0) cometActive = false;
 
-                ctx.strokeStyle = isSleeping ? 'rgba(188, 140, 255, 0.4)' : 'rgba(88, 166, 255, 0.5)';
-                ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cometX, cometY, 25 * (1 - cometAge), 0, Math.PI * 2); ctx.stroke();
-                ctx.fillStyle = isSleeping ? '#bc8cff' : '#58a6ff'; ctx.beginPath(); ctx.arc(cometX, cometY, 4 * (1 - cometAge), 0, Math.PI * 2); ctx.fill();
+                let alpha = 1.0 - cometAge;
+                ctx.strokeStyle = isSleeping ? `rgba(188, 140, 255, ${alpha})` : `rgba(88, 166, 255, ${alpha})`;
+                ctx.lineWidth = 2; 
+                ctx.beginPath(); 
+                // Ring slowly collapses inward toward the impact coordinate point
+                ctx.arc(cometX, cometY, 5 + 40 * alpha, 0, Math.PI * 2); 
+                ctx.stroke();
+                
+                ctx.fillStyle = isSleeping ? `rgba(188, 140, 255, ${alpha})` : `rgba(88, 166, 255, ${alpha})`;
+                ctx.beginPath(); ctx.arc(cometX, cometY, 4, 0, Math.PI * 2); ctx.fill();
             }
 
-            // Render Star Core (Moral Compass)
+            // Render Star Core (Moral Compass) - Scales smoothly with glided mass values
             if (timelineRunning) system.star.pulse += 0.035 * simSpeedMultiplier;
-            let currentStarRadius = (system.star.baseRadius + (dynamicSolarMass * 4)) + Math.sin(system.star.pulse) * 1.5;
+            let currentStarRadius = (system.star.baseRadius + (currentSolarMass * 4)) + Math.sin(system.star.pulse) * 1.5;
             if (isSleeping) currentStarRadius *= (0.75 + Math.sin(system.star.pulse * 2) * 0.1);
 
             let grad = ctx.createRadialGradient(centerX, centerY, 2, centerX, centerY, Math.max(5, currentStarRadius));
@@ -334,7 +345,7 @@
             // Render Internal Asteroid Belt Field Noise
             system.asteroids.forEach(ast => {
                 if (timelineRunning) ast.angle += ast.speed * (isSleeping ? 0.25 : 1.0) * simSpeedMultiplier;
-                ast.distance = ast.baseDistance - ((dynamicSolarMass - 1.5) * 4);
+                ast.distance = ast.baseDistance - ((currentSolarMass - 1.5) * 4);
                 if (isSleeping) ast.distance *= (0.96 + Math.sin(system.star.pulse) * 0.02);
 
                 let ax = centerX + Math.cos(ast.angle) * ast.distance;
@@ -346,7 +357,8 @@
             // Render 7 Planetary Personality Manifolds
             system.planets.forEach((p) => {
                 if (timelineRunning) p.angle += p.speed * (isSleeping ? 0.15 : 1.0) * simSpeedMultiplier;
-                p.distance = p.baseDistance - ((dynamicSolarMass - 1.5) * 6);
+                // Planets slowly glide inward or outward along their orbital tracking vectors
+                p.distance = p.baseDistance - ((currentSolarMass - 1.5) * 6);
 
                 let px = centerX + Math.cos(p.angle) * p.distance;
                 let py = centerY + Math.sin(p.angle) * p.distance;
@@ -364,11 +376,12 @@
                 // 2 Nested Satellite Stabilizer Moons per Planet (14 Total Moons)
                 p.moons.forEach(moon => {
                     if (timelineRunning) moon.angle += moon.speed * (isSleeping ? 0.3 : 1.0) * simSpeedMultiplier;
-                    let mx = px + Math.cos(moon.angle) * moon.distance;
-                    let my = py + Math.sin(moon.angle) * moon.distance;
+                    // Measure stress dynamically using glided metrics
+                    let currentStress = Math.sqrt((cometX - px)**2 + (cometY - py)**2) / 150;
+                    moon.distance = moon.baseDistance + ((cometActive ? currentStress : 0) * 8);
 
                     ctx.strokeStyle = moon.color + '0d'; ctx.beginPath(); ctx.arc(px, py, moon.distance, 0, Math.PI * 2); ctx.stroke();
-                    ctx.fillStyle = moon.color; ctx.beginPath(); ctx.arc(mx, my, 1.8, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = moon.color; ctx.beginPath(); ctx.arc(mx=px + Math.cos(moon.angle) * moon.distance, my=py + Math.sin(moon.angle) * moon.distance, 1.8, 0, Math.PI * 2); ctx.fill();
                 });
             });
 
