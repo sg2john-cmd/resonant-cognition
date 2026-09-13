@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resonant Cognition Simulation</title>
+    <style>
+        body { margin: 0; background: #0b0e14; color: #e2e8f0; font-family: sans-serif; overflow: hidden; display: flex; }
+        #controls { width: 320px; background: #151b26; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.5); z-index: 10; display: flex; flex-direction: column; gap: 15px; height: 100vh; box-sizing: border-box; overflow-y: auto; }
+        #simulation { flex: 1; height: 100vh; position: relative; }
+        canvas { width: 100%; height: 100%; display: block; }
+        h3 { margin-top: 0; color: #4ade80; border-bottom: 1px solid #2d3748; padding-bottom: 5px; }
+        .control-group { display: flex; flex-direction: column; gap: 5px; }
+        label { font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between; }
+        input[type=range] { width: 100%; accent-color: #4ade80; }
+        .log-box { flex: 1; background: #020617; border: 1px solid #1e293b; padding: 10px; font-family: monospace; font-size: 11px; color: #38bdf8; overflow-y: auto; border-radius: 4px; max-height: 200px; }
+        .btn { background: #4ade80; color: #0b0e14; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s; text-align: center; }
+        .btn:hover { background: #22c55e; }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <h3>Resonant Orbit AI</h3>
+        <p style="font-size: 12px; color: #94a3b8; margin: 0;">Adjust planetary weights to alter the localized manifold grid and find the barycentric decision vector.</p>
+        
+        <div class="control-group">
+            <label>Core Gravitational Pull <span id="val-core">50</span></label>
+            <input type="range" id="param-core" min="10" max="100" value="50">
+        </div>
+        
+        <div class="control-group">
+            <label>Stochastic Periphery Chaos <span id="val-chaos">30</span></label>
+            <input type="range" id="param-chaos" min="0" max="100" value="30">
+        </div>
+
+        <div style="border-top: 1px solid #2d3748; margin: 5px 0;"></div>
+        
+        <div class="control-group">
+            <label>Planet 1: Logic Engine <span id="val-p1">60</span></label>
+            <input type="range" class="planet-slide" data-idx="0" min="0" max="100" value="60">
+        </div>
+        <div class="control-group">
+            <label>Planet 2: Creative Drive <span id="val-p2">40</span></label>
+            <input type="range" class="planet-slide" data-idx="1" min="0" max="100" value="40">
+        </div>
+        <div class="control-group">
+            <label>Planet 3: Ethical Guard <span id="val-p3">80</span></label>
+            <input type="range" class="planet-slide" data-idx="2" min="0" max="100" value="80">
+        </div>
+        <div class="control-group">
+            <label>Planet 4: Emotional Context <span id="val-p4">30</span></label>
+            <input type="range" class="planet-slide" data-idx="3" min="0" max="100" value="30">
+        </div>
+        <div class="control-group">
+            <label>Planet 5: Survival Instinct <span id="val-p5">70</span></label>
+            <input type="range" class="planet-slide" data-idx="4" min="0" max="100" value="70">
+        </div>
+        <div class="control-group">
+            <label>Planet 6: Memory Database <span id="val-p6">50</span></label>
+            <input type="range" class="planet-slide" data-idx="5" min="0" max="100" value="50">
+        </div>
+        <div class="control-group">
+            <label>Planet 7: Intent Filter <span id="val-p7">45</span></label>
+            <input type="range" class="planet-slide" data-idx="6" min="0" max="100" value="45">
+        </div>
+
+        <button class="btn" id="trigger-collapse">Trigger Black Hole Purge</button>
+        
+        <div class="log-box" id="log">System initialized... awaiting barycentric convergence metrics.</div>
+    </div>
+    
+    <div id="simulation">
+        <canvas id="spaceCanvas"></canvas>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('spaceCanvas');
+        const ctx = canvas.getContext('2d');
+        const logBox = document.getElementById('log');
+
+        function resize() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // System state
+        let coreGravity = 50;
+        let chaosLevel = 30;
+        let planets = [
+            { name: "Logic Engine", radius: 100, angle: 0, speed: 0.02, weight: 60, color: "#38bdf8" },
+            { name: "Creative Drive", radius: 140, angle: 1, speed: 0.015, weight: 40, color: "#f472b6" },
+            { name: "Ethical Guard", radius: 180, angle: 2, speed: 0.01, weight: 80, color: "#4ade80" },
+            { name: "Emotional Context", radius: 220, angle: 3, speed: 0.008, weight: 30, color: "#fbbf24" },
+            { name: "Survival Instinct", radius: 260, angle: 4, speed: 0.007, weight: 70, color: "#f87171" },
+            { name: "Memory Database", radius: 300, angle: 5, speed: 0.005, weight: 50, color: "#c084fc" },
+            { name: "Intent Filter", radius: 340, angle: 6, speed: 0.004, weight: 45, color: "#2dd4bf" }
+        ];
+
+        let asteroids = [];
+        function initAsteroids() {
+            asteroids = [];
+            for(let i=0; i<120; i++) {
+                let r = 200 + Math.random() * 80;
+                if(Math.random() > 0.5) r = 110 + Math.random() * 40; 
+                asteroids.push({
+                    radius: r,
+                    angle: Math.random() * Math.PI * 2,
+                    speed: (0.005 + Math.random() * 0.01) * (Math.random() > 0.5 ? 1 : -1),
+                    size: 1 + Math.random() * 2
+                });
+            }
+        }
+        initAsteroids();
+
+        let isCollapsing = false;
+        let collapseProgress = 0;
+
+        // UI Listeners
+        document.getElementById('param-core').addEventListener('input', (e) => {
+            coreGravity = parseInt(e.target.value);
+            document.getElementById('val-core').innerText = coreGravity;
+        });
+        document.getElementById('param-chaos').addEventListener('input', (e) => {
+            chaosLevel = parseInt(e.target.value);
+            document.getElementById('val-chaos').innerText = chaosLevel;
+            initAsteroids();
+        });
+        document.querySelectorAll('.planet-slide').forEach(slide => {
+            slide.addEventListener('input', (e) => {
+                let idx = parseInt(e.target.getAttribute('data-idx'));
+                planets[idx].weight = parseInt(e.target.value);
+                document.getElementById('val-p' + (idx+1)).innerText = planets[idx].weight;
+            });
+        });
+        document.getElementById('trigger-collapse').addEventListener('click', () => {
+            if(isCollapsing) return;
+            isCollapsing = true;
+            collapseProgress = 1.0;
+            logBox.innerHTML += "<br><span style='color:#ef4444;'>[CRITICAL] Singular collapse active. Defragmenting manifold...</span>";
+            logBox.scrollTop = logBox.scrollHeight;
+        });
+
+        // Loop
+        function animate() {
+            ctx.fillStyle = 'rgba(11, 14, 20, 0.2)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            
+            // Draw Core
+            let currentCoreSize = 15 + (coreGravity / 10);
+            if(isCollapsing) {
+                currentCoreSize = currentCoreSize * (0.3 + Math.abs(Math.sin(Date.now()*0.02))*0.2);
+            }
+            
+            let grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, currentCoreSize);
+            if(isCollapsing) {
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(0.3, '#c084fc');
+                grad.addColorStop(1, 'transparent');
+            } else {
+                grad.addColorStop(0, '#4ade80');
+                grad.addColorStop(0.5, 'rgba(74, 222, 128, 0.4)');
+                grad.addColorStop(1, 'transparent');
+            }
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(cx, cy, currentCoreSize, 0, Math.PI*2);
+            ctx.fill();
+
+            // Calculate barycentric drift based on planet vectors
+            let totalX = 0, totalY = 0, totalWeight = 0;
+
+            // Draw orbits and planets
+            planets.forEach((p, i) => {
+                p.angle += p.speed * (1 + chaosLevel/100);
+                
+                let currentRadius = p.radius;
+                if(isCollapsing) {
+                    currentRadius = p.radius * collapseProgress;
+                }
+
+                let px = cx + Math.cos(p.angle) * currentRadius;
+                let py = cy + Math.sin(p.angle) * currentRadius;
+                
+                totalX += Math.cos(p.angle) * p.weight;
+                totalY += Math.sin(p.angle) * p.weight;
+                totalWeight += p.weight;
+
+                // Draw Orbit Track
+                ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(cx, cy, currentRadius, 0, Math.PI*2);
+                ctx.stroke();
+
+                // Draw Planet
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(px, py, 6 + (p.weight/20), 0, Math.PI*2);
+                ctx.fill();
+                
+                // Active field glow
+                ctx.fillStyle = p.color + '1a';
+                ctx.beginPath();
+                ctx.arc(px, py, 20 + p.weight, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            // Asteroid belt
+            ctx.fillStyle = 'rgba(148, 163, 184, 0.6)';
+            asteroids.forEach(ast => {
+                ast.angle += ast.speed * (1 + chaosLevel/50);
+                let currentAstRad = ast.radius;
+                if(isCollapsing) {
+                    currentAstRad = ast.radius * collapseProgress;
+                }
+                let ax = cx + Math.cos(ast.angle) * currentAstRad;
+                let ay = cy + Math.sin(ast.angle) * currentAstRad;
+                
+                // Add noise based on chaos parameter
+                if(chaosLevel > 0) {
+                    ax += (Math.random() - 0.5) * (chaosLevel / 10);
+                    ay += (Math.random() - 0.5) * (chaosLevel / 10);
+                }
+
+                ctx.beginPath();
+                ctx.arc(ax, ay, ast.size, 0, Math.PI*2);
+                ctx.fill();
+            });
+
+            // Calculate exact convergent barycenter
+            if(totalWeight > 0 && !isCollapsing) {
+                let bx = cx + (totalX / totalWeight) * 80;
+                let by = cy + (totalY / totalWeight) * 80;
+                
+                // Draw crosshair for the decision point
+                ctx.strokeStyle = '#ef4444';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(bx - 10, by); ctx.lineTo(bx + 10, by);
+                ctx.moveTo(bx, by - 10); ctx.lineTo(bx, by + 10);
+                ctx.stroke();
+                
+                // Label vector target
+                ctx.fillStyle = '#ef4444';
+                ctx.font = '10px monospace';
+                ctx.fillText(`Convergence Target: [${(bx-cx).toFixed(1)}, ${(by-cy).toFixed(1)}]`, bx + 12, by + 4);
+                
+                if(Math.random() < 0.02) {
+                    logBox.innerHTML = `Barycentric equilibrium aligned.<br>Vector drift: ${((totalX/totalWeight)).toFixed(3)} rad.<br>Resonant lock: stable.`;
+                }
+            }
+
+            if(isCollapsing) {
+                collapseProgress -= 0.01;
+                if(collapseProgress <= 0.05) {
+                    isCollapsing = false;
+                    collapseProgress = 1.0;
+                    logBox.innerHTML = "<span style='color:#4ade80;'>[SUCCESS] Manifold cleared. System data optimized. Stable configurations restored.</span>";
+                }
+            }
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
+</body>
+</html>
