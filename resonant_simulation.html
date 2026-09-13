@@ -172,7 +172,7 @@
         }
 
         function connectLiveAntenna() {
-            const ws = new WebSocket('ws://localhost:8765');
+            const ws = new WebSocket('ws://127.0.0.1:8765');
 
             ws.onopen = () => {
                 document.getElementById('conn-dot').classList.add('connected');
