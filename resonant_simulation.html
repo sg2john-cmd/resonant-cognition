@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resonant Cognition: Live 22-Body Solar Dashboard (v8.0)</title>
+    <title>Resonant Cognition: Live 22-Body Solar Dashboard (v9.0)</title>
     <style>
         body {
             margin: 0;
@@ -51,7 +51,7 @@
             font-family: monospace;
             font-size: 11px;
             line-height: 1.4;
-            height: 240px;
+            height: 180px;
             overflow-y: auto;
         }
         .slider-group {
@@ -61,7 +61,16 @@
             font-size: 12px;
         }
         .slider-group label { display: flex; justify-content: space-between; }
-        input[type=range] { width: 100%; accent-color: #58a6ff; }
+        input[type=range], input[type=text] { 
+            width: 100%; 
+            accent-color: #58a6ff; 
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+            padding: 8px;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
         .panel-metric {
             font-size: 12px;
             background-color: #0d1117;
@@ -71,6 +80,26 @@
             font-family: monospace;
             line-height: 1.5;
         }
+        .btn-row {
+            display: flex;
+            gap: 8px;
+        }
+        .btn {
+            flex: 1;
+            background-color: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        .btn:hover { background-color: #30363d; border-color: #8b949e; }
+        .btn-active { background-color: #238636; color: white; border-color: #2ea043; }
+        .btn-active:hover { background-color: #2ea043; }
         .highlight { color: #ffac33; font-weight: bold; }
         .synergy { color: #ff55ff; font-weight: bold; }
         .status-dot {
@@ -87,11 +116,27 @@
 <body>
 
     <div id="sidebar">
-        <h3>v8.0 Live Core Telemetry</h3>
+        <h3>v9.0 Live Interactive Core</h3>
         
         <div class="panel-metric">
-            <span id="conn-dot" class="status-dot"></span> Network Link: <span id="conn-status">DISCONNECTED</span><br>
-            System State: <span id="ui-mode" class="highlight">DORMANT</span>
+            <span id="conn-dot" class="status-dot"></span> Link: <span id="conn-status">DISCONNECTED</span><br>
+            State: <span id="ui-mode" class="highlight">DORMANT</span>
+        </div>
+
+        <!-- 1. Live Input Injection Vector Box Layout -->
+        <div class="slider-group">
+            <label><span>Inject Vector Sequence to Engine</span></label>
+            <input type="text" id="vector-input" placeholder="e.g., 1,0.5,0 | -1,1.5,-0.5">
+            <button class="btn btn-active" id="inject-btn" style="margin-top: 4px;">Transmit Stream</button>
+        </div>
+
+        <!-- 2. The Temporal Pause/Timeline Controller Layout -->
+        <div class="slider-group">
+            <label><span>Timeline Speed Warp</span><span id="speed-val">1.0x</span></label>
+            <input type="range" id="speed-slider" min="0.1" max="2.0" step="0.1" value="1.0">
+            <div class="btn-row" style="margin-top: 4px;">
+                <button class="btn" id="play-pause-btn">Pause Timeline</button>
+            </div>
         </div>
 
         <div class="panel-metric">
@@ -105,13 +150,16 @@
         </div>
 
         <h3>Active Node Telemetry</h3>
-        <div class="metric-box" id="terminal-log">> Terminal Link offline.<br>> Awaiting local core ignition...<br>> Launch resonant_engine.py to bind fields.</div>
+        <div class="metric-box" id="terminal-log">> Terminal Link offline.<br>> Awaiting local core ignition...</div>
     </div>
 
     <div id="canvas-container">
         <canvas id="simulationCanvas"></canvas>
     </div>
-    <script>
+
+
+
+        <script>
         const canvas = document.getElementById('simulationCanvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
@@ -119,12 +167,16 @@
 
         let echoRetention = 0.92;
         let isSleeping = false;
-        let aggregateSystemStress = 0.0;
+        let timelineRunning = true;
+        let simSpeedMultiplier = 1.0;
+        
         let dynamicSolarMass = 1.5;
+        let uiDissonance = 0.0;
 
         let cometActive = false;
         let cometX = 0, cometY = 0;
         let cometAge = 0;
+        let globalWebsocketRef = null;
 
         function resize() {
             canvas.width = container.clientWidth;
@@ -133,7 +185,6 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // 7 Planets mirroring your exact Python v9.5 coordinates
         const system = {
             star: { x: 0, y: 0, baseRadius: 26, pulse: 0, color: '#ffac33' },
             planets: [
@@ -148,7 +199,6 @@
             asteroids: []
         };
 
-        // Symmetry: 2 stabilizer moons nested directly inside each planet (14 total moons)
         system.planets.forEach(p => {
             p.moons.push({ name: 'Alpha', baseDistance: 14, distance: 14, speed: 0.05, angle: Math.random() * 6, color: '#3081f7' });
             p.moons.push({ name: 'Beta', baseDistance: 19, distance: 19, speed: -0.03, angle: Math.random() * 6, color: '#ff4500' });
@@ -160,24 +210,22 @@
             });
         }
 
-        document.getElementById('echo-slider').addEventListener('input', (e) => {
-            echoRetention = parseFloat(e.target.value);
-            document.getElementById('echo-val').innerText = echoRetention.toFixed(2);
-        });
-
         function terminalPrint(text, styleClass = "") {
             const wrapper = styleClass ? `<span class="${styleClass}">${text}</span>` : text;
             logBox.innerHTML += `<br>> ${wrapper}`;
             logBox.scrollTop = logBox.scrollHeight;
         }
 
+        // --- WebSocket Communication Gateway Handshake Loop ---
         function connectLiveAntenna() {
+            // FIXED: Using raw IP string to bypass local sandboxed Firefox security protocols
             const ws = new WebSocket('ws://127.0.0.1:8765');
+            globalWebsocketRef = ws;
 
             ws.onopen = () => {
                 document.getElementById('conn-dot').classList.add('connected');
                 document.getElementById('conn-status').innerText = 'CONNECTED TO CORE';
-                logBox.innerHTML = "> Link Established. Synchronizing multi-body matrices...";
+                logBox.innerHTML = "> Link Established. Live 22-body grid active.";
             };
 
             ws.onmessage = (event) => {
@@ -188,21 +236,19 @@
                 document.getElementById('ui-solar-mass').innerText = data.solar_mass.toFixed(2);
                 
                 dynamicSolarMass = data.solar_mass;
+                uiDissonance = data.dissonance;
                 isSleeping = (data.mode === "REM_SLEEP");
 
                 if (data.type === "STIMULUS_EVENT") {
-                    cometActive = true;
-                    cometAge = 0;
-                    cometX = (canvas.width / 2) + data.input_coords[0] * 70;
-                    cometY = (canvas.height / 2) + data.input_coords[1] * 70;
-                    
+                    cometActive = true; cometAge = 0;
+                    cometX = (canvas.width / 2) + data.input_coords * 70;
+                    cometY = (canvas.height / 2) + data.input_coords * 70;
                     terminalPrint(`Stimulus: Vector [${data.input_coords.join(', ')}]`);
                     data.spikes.forEach(s => terminalPrint(`🔥 Synergy: '${s.name}' locked focus!`, 'synergy'));
                 } else if (data.type === "SLEEP_REPLAY_EVENT") {
-                    cometActive = true;
-                    cometAge = 0;
-                    cometX = (canvas.width / 2) + data.input_coords[0] * 70;
-                    cometY = (canvas.height / 2) + data.input_coords[1] * 70;
+                    cometActive = true; cometAge = 0;
+                    cometX = (canvas.width / 2) + data.input_coords * 70;
+                    cometY = (canvas.height / 2) + data.input_coords * 70;
                     terminalPrint(`🎬 [REM] Replaying Trace: [${data.input_coords.map(v=>v.toFixed(2)).join(', ')}]`);
                 } else if (data.type === "SYSTEM_LOG") {
                     terminalPrint(data.message, data.msg_style);
@@ -213,42 +259,81 @@
                 document.getElementById('conn-dot').classList.remove('connected');
                 document.getElementById('conn-status').innerText = 'LINK DISCONNECTED';
                 document.getElementById('ui-mode').innerText = 'DORMANT';
+                globalWebsocketRef = null;
                 setTimeout(connectLiveAntenna, 3000);
             };
         }
         connectLiveAntenna();
+
+
+
+                    // --- Interactive Controller Event Hookups ---
+        document.getElementById('inject-btn').addEventListener('click', () => {
+            const txt = document.getElementById('vector-input').value.trim();
+            if(!txt) return;
+            if(globalWebsocketRef && globalWebsocketRef.readyState === WebSocket.OPEN) {
+                // Transmit input straight down the live pipeline socket right into Python's waiting loop prompt
+                globalWebsocketRef.send(txt);
+                terminalPrint(`Transmitting remote injection stream: ${txt}`);
+                document.getElementById('vector-input').value = "";
+            } else {
+                terminalPrint("ERROR: Transmission failed. Backend loop offline.", "synergy");
+            }
+        });
+
+        document.getElementById('speed-slider').addEventListener('input', (e) => {
+            simSpeedMultiplier = parseFloat(e.target.value);
+            document.getElementById('speed-val').innerText = simSpeedMultiplier.toFixed(1) + 'x';
+        });
+
+        const toggleBtn = document.getElementById('play-pause-btn');
+        toggleBtn.addEventListener('click', () => {
+            timelineRunning = !timelineRunning;
+            if(timelineRunning) {
+                toggleBtn.innerText = "Pause Timeline";
+                toggleBtn.classList.remove('btn-active');
+            } else {
+                toggleBtn.innerText = "Resume Timeline";
+                toggleBtn.classList.add('btn-active');
+            }
+        });
+
+        document.getElementById('echo-slider').addEventListener('input', (e) => {
+            echoRetention = parseFloat(e.target.value);
+            document.getElementById('echo-val').innerText = echoRetention.toFixed(2);
+        });
+
         function draw() {
+            // Apply echo retention frames
             ctx.fillStyle = `rgba(13, 17, 23, ${1 - echoRetention})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
 
+            // Handle live incoming data comet tracking markers
             if (cometActive) {
-                cometAge += 0.015;
+                // Comet tracking speeds scale based on your time warp speed configuration selector
+                cometAge += 0.012 * (timelineRunning ? simSpeedMultiplier : 0.0);
                 if (cometAge >= 1.0) cometActive = false;
 
                 ctx.strokeStyle = isSleeping ? 'rgba(188, 140, 255, 0.4)' : 'rgba(88, 166, 255, 0.5)';
                 ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cometX, cometY, 25 * (1 - cometAge), 0, Math.PI * 2); ctx.stroke();
-                
-                ctx.fillStyle = isSleeping ? '#bc8cff' : '#58a6ff';
-                ctx.beginPath(); ctx.arc(cometX, cometY, 4 * (1 - cometAge), 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = isSleeping ? '#bc8cff' : '#58a6ff'; ctx.beginPath(); ctx.arc(cometX, cometY, 4 * (1 - cometAge), 0, Math.PI * 2); ctx.fill();
             }
 
             // Render Star Core (Moral Compass)
-            system.star.pulse += 0.035;
+            if (timelineRunning) system.star.pulse += 0.035 * simSpeedMultiplier;
             let currentStarRadius = (system.star.baseRadius + (dynamicSolarMass * 4)) + Math.sin(system.star.pulse) * 1.5;
             if (isSleeping) currentStarRadius *= (0.75 + Math.sin(system.star.pulse * 2) * 0.1);
 
             let grad = ctx.createRadialGradient(centerX, centerY, 2, centerX, centerY, Math.max(5, currentStarRadius));
-            grad.addColorStop(0, '#ffffff'); 
-            grad.addColorStop(0.3, isSleeping ? '#8a2be2' : system.star.color); 
-            grad.addColorStop(1, 'transparent');
+            grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.3, isSleeping ? '#8a2be2' : system.star.color); grad.addColorStop(1, 'transparent');
             ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(centerX, centerY, Math.max(5, currentStarRadius * 1.4), 0, Math.PI * 2); ctx.fill();
 
-            // Render Internal Asteroid Belt Noise Field
+            // Render Internal Asteroid Belt Field Noise
             system.asteroids.forEach(ast => {
-                ast.angle += ast.speed * (isSleeping ? 0.25 : 1.0);
+                if (timelineRunning) ast.angle += ast.speed * (isSleeping ? 0.25 : 1.0) * simSpeedMultiplier;
                 ast.distance = ast.baseDistance - ((dynamicSolarMass - 1.5) * 4);
                 if (isSleeping) ast.distance *= (0.96 + Math.sin(system.star.pulse) * 0.02);
 
@@ -258,27 +343,27 @@
                 ctx.beginPath(); ctx.arc(ax, ay, ast.size, 0, Math.PI * 2); ctx.fill();
             });
 
-            // Render 7 Planetary Personality Systems
+            // Render 7 Planetary Personality Manifolds
             system.planets.forEach((p) => {
-                p.angle += p.speed * (isSleeping ? 0.15 : 1.0);
+                if (timelineRunning) p.angle += p.speed * (isSleeping ? 0.15 : 1.0) * simSpeedMultiplier;
                 p.distance = p.baseDistance - ((dynamicSolarMass - 1.5) * 6);
 
                 let px = centerX + Math.cos(p.angle) * p.distance;
                 let py = centerY + Math.sin(p.angle) * p.distance;
 
-                // Render internal component layers (Id / Superego offsets)
+                // Render internal component layers offsets
                 ctx.strokeStyle = p.color + '1a'; ctx.lineWidth = 1;
                 let idx = px + p.idX; let idy = py + p.idY;
                 ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(idx, idy); ctx.stroke();
                 let spx = px + p.superegoX; let spy = py + p.superegoY;
                 ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(spx, spy); ctx.stroke();
 
-                // Planet Node
+                // Planet Body
                 ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(px, py, p.size, 0, Math.PI * 2); ctx.fill();
 
-                // 2 Nested Satellite Stabilizer Moons per Planet (14 Total)
+                // 2 Nested Satellite Stabilizer Moons per Planet (14 Total Moons)
                 p.moons.forEach(moon => {
-                    moon.angle += moon.speed * (isSleeping ? 0.3 : 1.0);
+                    if (timelineRunning) moon.angle += moon.speed * (isSleeping ? 0.3 : 1.0) * simSpeedMultiplier;
                     let mx = px + Math.cos(moon.angle) * moon.distance;
                     let my = py + Math.sin(moon.angle) * moon.distance;
 
