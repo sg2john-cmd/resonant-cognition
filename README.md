@@ -19,11 +19,13 @@ This paradigm zooms out to show that intelligence functions as a scale-invariant
 
 ---
 
+
 ## 📂 Repository Contents
 
-* **Paper 1:** `A_Formal_Framework_for_Resonant_Cognition.pdf` – The mathematical and quantum-cognitive architecture of geometric intent fields and wave collapse.
-* **Paper 2:** `Resonant_Cognition_II__The_Cosmological_Architecture.pdf` – The fractal macro-scale expansion linking cognitive manifolds to orbital gravity equations.
-* **Simulation Engine:** `resonant_simulation.html` – A standalone, standalone interactive visualizer mapping a 7-planet barycentric cognitive structure in live time.
+- **Paper 1:** `A_Formal_Framework_for_Resonant_Cognition__The_Geometry_of_Multi-Dimensional_Intentionality.pdf` – The mathematical and quantum-cognitive architecture of geometric intent fields and wave collapse.
+- **Paper 2:** `Resonant_Cognition_II__The_Cosmological_Architecture_of_Intentionality.pdf` – The fractal macro-scale expansion linking cognitive manifolds to orbital gravity equations.
+- **Paper 3:** `Dynamic_Information_Evolution__Managing_Cognitive_Entropy.pdf` – The closed-loop thermodynamic data cycle managing memory integration, defragmentation, and white-hole re-emergence.
+- **Simulation Engine:** `resonant_simulation.html` – A standalone interactive visualizer mapping a 7-planet barycentric cognitive structure in live time.
 
 ---
 
