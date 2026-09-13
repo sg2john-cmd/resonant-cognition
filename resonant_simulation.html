@@ -240,4 +240,61 @@
                 ctx.arc(bx, by, Math.max(1, body.size * (1 - purgeProgress)), 0, Math.PI * 2);
                 ctx.fill();
 
-if(!isPurging && body.parentIdx === undefined) {activeIntersections.push({x: bx, y: by});}});// Calculate Wave Collapse Vector Crosshair Destination (Live Resonant Center)if (activeIntersections.length > 0 && !isPurging) {let targetX = activeIntersections.reduce((sum, p) => sum + p.x, 0) / activeIntersections.length;let targetY = activeIntersections.reduce((sum, p) => sum + p.y, 0) / activeIntersections.length;ctx.strokeStyle = 'rgba(88, 166, 255, 0.6)';ctx.lineWidth = 1.5;ctx.setLineDash([4, 4]);// Render crosshair vector target boxctx.beginPath();ctx.arc(targetX, targetY, 8, 0, Math.PI * 2);ctx.moveTo(targetX - 15, targetY); ctx.lineTo(targetX + 15, targetY);ctx.moveTo(targetX, targetY - 15); ctx.lineTo(targetX, targetY + 15);ctx.stroke();ctx.setLineDash([]);}// Manage Purge Execution Physicsif (isPurging) {purgeProgress += 0.01;if(Math.random() < 0.15) terminalPrint(Defragmenting address range space: NULLIFY_DATA_BLOCK_${Math.floor(Math.random()*900)});if (purgeProgress >= 1) {isPurging = false;purgeProgress = 0;// Reset positions perfectly following singularity optimizationsystem.bodies.forEach(b => b.distance = b.parentIdx !== undefined ? (b.id === 5 ? 30 : 35) : (b.id===1?90:b.id===2?150:b.id===3?210:280));for(let i=0; i<60; i++) system.asteroids[i].distance = 170 + Math.random() * 25;terminalPrint("SUCCESS: Topological cleanup complete. Perfect barycentric alignment achieved.");}}requestAnimationFrame(draw);}draw();
+                // Track non-moon bodies for calculation
+                if (!isPurging && body.parentIdx === undefined) {
+                    activeIntersections.push({ x: bx, y: by });
+                }
+            });
+
+            // Calculate Wave Collapse Vector Crosshair Destination (Live Resonant Center)
+            if (activeIntersections.length > 0 && !isPurging) {
+                let targetX = activeIntersections.reduce((sum, p) => sum + p.x, 0) / activeIntersections.length;
+                let targetY = activeIntersections.reduce((sum, p) => sum + p.y, 0) / activeIntersections.length;
+
+                ctx.strokeStyle = 'rgba(88, 166, 255, 0.6)';
+                ctx.lineWidth = 1.5;
+                ctx.setLineDash([4, 4]);
+
+                // Render crosshair vector target box
+                ctx.beginPath();
+                ctx.arc(targetX, targetY, 8, 0, Math.PI * 2);
+                ctx.moveTo(targetX - 15, targetY); 
+                ctx.lineTo(targetX + 15, targetY);
+                ctx.moveTo(targetX, targetY - 15); 
+                ctx.lineTo(targetX, targetY + 15);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Manage Purge Execution Physics
+            if (isPurging) {
+                purgeProgress += 0.01;
+                
+                if (Math.random() < 0.15) {
+                    terminalPrint(`Defragmenting address range space: NULLIFY_DATA_BLOCK_${Math.floor(Math.random() * 900)}`);
+                }
+                
+                if (purgeProgress >= 1) {
+                    isPurging = false;
+                    purgeProgress = 0;
+                    
+                    // Reset positions perfectly following singularity optimization
+                    system.bodies.forEach(b => {
+                        b.distance = b.parentIdx !== undefined ? (b.id === 5 ? 30 : 35) : (b.id === 1 ? 90 : b.id === 2 ? 150 : b.id === 3 ? 210 : 280);
+                    });
+                    
+                    for (let i = 0; i < 60; i++) {
+                        system.asteroids[i].distance = 170 + Math.random() * 25;
+                    }
+                    
+                    terminalPrint("SUCCESS: Topological cleanup complete. Perfect barycentric alignment achieved.");
+                }
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        draw();
+    </script>
+</body>
+</html>
