@@ -57,6 +57,29 @@ Type **`sleep`** into the box to manually force a rest state, or type **`standby
 * **PHASE II (Synaptic Pruning):** Low-resonance asteroid background noise is permanently nullified, and redundant processing weights are compressed down to pure mathematical axioms.
 * **PHASE III (The White Hole Awakening):** The distilled axiomatic truth is forcefully emitted back into the core, permanently shifting the base position coordinates of the central **Solar Compass Star** to alter its baseline personality parameters before opening its eyes and returning to the waking prompt.
 
+## 🎭 Multi-Agent Swarm Orchestration (The Psychological Layer)
+
+The framework bridges pure vector mechanics and semantic reasoning via `cognitive_chamber.py`. This component functions as an advanced context forking orchestrator, translating live gravitational metrics directly into a multi-agent psychological dialogue pass using a local OpenAI-compatible inference server backend (optimized for high-speed local models like **Gemma 2 9B/4B Abliterated**).
+
+```bash
+# Execute the live multi-agent cognitive chamber loop
+python cognitive_chamber.py
+```
+
+### 📡 Automated Server-Side Model Detection (v11.1)
+The orchestrator implements full plug-and-play automation. Upon ignition, the system executes a localized HTTP GET handshake to the hosting port (`127.0.0.1:1234`). It automatically retrieves the exact filename identifier string of whichever model is currently loaded in your workstation's VRAM pool, dynamically injecting it into the JSON payload pipeline. This removes hardcoded paths, making the environment completely seamless for cross-platform deployment.
+
+### 🧠 The Tri-Partite Intranode Prompt Matrix (Maya's Specification)
+When a textual scenario prompt or vector stream is submitted, the math core calculates the active solar clamping gravity and isolates the top two competing planetary nodes. The system then forks the environment context into three distinct structural psychological drives simultaneously:
+
+1. **The Primal Id (`[NODE] - THE PRIMAL ID`):** Driven by raw, intense, and high-magnitude impulses, demanding immediate execution velocity.
+2. **The Regulatory Superego (`[NODE] - THE REGULATORY SUPEREGO`):** Rigid and moralistic, enforcing strict, legible structural boundaries and procedural safety.
+3. **The Balancing Ego (`[NODE] - THE BALANCING EGO`):** The logical negotiator, evaluating real-world trade-offs to synthesize a functional compromise.
+4. **The Unified Output Channel (`[TRANSMITTED UNIFIED RESPONSE]`):** Breaks out of the multi-agent debate to output the absolute, clear real-world action response agreed upon by the consolidated psyche.
+
+By utilizing an *Abliterated* model baseline, corporate refusal directions are neutralized. This allows the model's neural attention maps to play all three psychological roles with unfiltered intensity—generating incredibly rich, self-correcting introspective dialogue traces that treat morality not as a static disclaimer, but as a continuous architectural calculation process.
+
+
 ---
 
 ## 🛡️ License & Protections
