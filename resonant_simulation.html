@@ -1,270 +1,243 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Resonant Cognition Simulation</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resonant Cognition: Fluid 7-Planet Engine Prototype</title>
     <style>
-        body { margin: 0; background: #0b0e14; color: #e2e8f0; font-family: sans-serif; overflow: hidden; display: flex; }
-        #controls { width: 320px; background: #151b26; padding: 20px; box-shadow: 2px 0 10px rgba(0,0,0,0.5); z-index: 10; display: flex; flex-direction: column; gap: 15px; height: 100vh; box-sizing: border-box; overflow-y: auto; }
-        #simulation { flex: 1; height: 100vh; position: relative; }
-        canvas { width: 100%; height: 100%; display: block; }
-        h3 { margin-top: 0; color: #4ade80; border-bottom: 1px solid #2d3748; padding-bottom: 5px; }
-        .control-group { display: flex; flex-direction: column; gap: 5px; }
-        label { font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between; }
-        input[type=range] { width: 100%; accent-color: #4ade80; }
-        .log-box { flex: 1; background: #020617; border: 1px solid #1e293b; padding: 10px; font-family: monospace; font-size: 11px; color: #38bdf8; overflow-y: auto; border-radius: 4px; max-height: 200px; }
-        .btn { background: #4ade80; color: #0b0e14; border: none; padding: 10px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s; text-align: center; }
-        .btn:hover { background: #22c55e; }
+        body {
+            margin: 0;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+        #sidebar {
+            width: 320px;
+            background-color: #161b22;
+            border-right: 1px solid #30363d;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+        #canvas-container {
+            flex-grow: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #111622 0%, #070a10 100%);
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        h3 { margin-top: 0; color: #58a6ff; font-weight: 600; border-bottom: 1px solid #30363d; padding-bottom: 8px;}
+        .metric-box {
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .btn {
+            background-color: #238636;
+            color: white;
+            border: 1px solid rgba(240,246,252,0.1);
+            border-radius: 6px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+            text-align: center;
+        }
+        .btn:hover { background-color: #2ea043; }
+        .btn-purge { background-color: #da3633; }
+        .btn-purge:hover { background-color: #f85149; }
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            font-size: 12px;
+        }
+        .slider-group label { display: flex; justify-content: space-between; }
+        input[type=range] { width: 100%; accent-color: #58a6ff; }
     </style>
 </head>
 <body>
-    <div id="controls">
-        <h3>Resonant Orbit AI</h3>
-        <p style="font-size: 12px; color: #94a3b8; margin: 0;">Adjust planetary weights to alter the localized manifold grid and find the barycentric decision vector.</p>
+
+    <div id="sidebar">
+        <h3>Resonant Control Panel</h3>
         
-        <div class="control-group">
-            <label>Core Gravitational Pull <span id="val-core">50</span></label>
-            <input type="range" id="param-core" min="10" max="100" value="50">
-        </div>
-        
-        <div class="control-group">
-            <label>Stochastic Periphery Chaos <span id="val-chaos">30</span></label>
-            <input type="range" id="param-chaos" min="0" max="100" value="30">
+        <div class="slider-group">
+            <label><span>Stochastic Periphery Chaos</span><span id="chaos-val">1.0</span></label>
+            <input type="range" id="chaos-slider" min="0" max="3" step="0.1" value="1">
         </div>
 
-        <div style="border-top: 1px solid #2d3748; margin: 5px 0;"></div>
-        
-        <div class="control-group">
-            <label>Planet 1: Logic Engine <span id="val-p1">60</span></label>
-            <input type="range" class="planet-slide" data-idx="0" min="0" max="100" value="60">
-        </div>
-        <div class="control-group">
-            <label>Planet 2: Creative Drive <span id="val-p2">40</span></label>
-            <input type="range" class="planet-slide" data-idx="1" min="0" max="100" value="40">
-        </div>
-        <div class="control-group">
-            <label>Planet 3: Ethical Guard <span id="val-p3">80</span></label>
-            <input type="range" class="planet-slide" data-idx="2" min="0" max="100" value="80">
-        </div>
-        <div class="control-group">
-            <label>Planet 4: Emotional Context <span id="val-p4">30</span></label>
-            <input type="range" class="planet-slide" data-idx="3" min="0" max="100" value="30">
-        </div>
-        <div class="control-group">
-            <label>Planet 5: Survival Instinct <span id="val-p5">70</span></label>
-            <input type="range" class="planet-slide" data-idx="4" min="0" max="100" value="70">
-        </div>
-        <div class="control-group">
-            <label>Planet 6: Memory Database <span id="val-p6">50</span></label>
-            <input type="range" class="planet-slide" data-idx="5" min="0" max="100" value="50">
-        </div>
-        <div class="control-group">
-            <label>Planet 7: Intent Filter <span id="val-p7">45</span></label>
-            <input type="range" class="planet-slide" data-idx="6" min="0" max="100" value="45">
+        <div class="slider-group">
+            <label><span>Residual Echo Memory</span><span id="echo-val">0.95</span></label>
+            <input type="range" id="echo-slider" min="0.8" max="0.99" step="0.01" value="0.95">
         </div>
 
-        <button class="btn" id="trigger-collapse">Trigger Black Hole Purge</button>
-        
-        <div class="log-box" id="log">System initialized... awaiting barycentric convergence metrics.</div>
+        <button class="btn btn-purge" id="purge-btn">Execute Singular Black Hole Purge</button>
+
+        <h3>Quantum State Terminal</h3>
+        <div class="metric-box" id="terminal-log">> System initialized.<br>> Field Barycenter aligned.<br>> 7 Intent Spheres active.</div>
     </div>
-    
-    <div id="simulation">
-        <canvas id="spaceCanvas"></canvas>
+
+    <div id="canvas-container">
+        <canvas id="simulationCanvas"></canvas>
     </div>
 
     <script>
-        const canvas = document.getElementById('spaceCanvas');
+        const canvas = document.getElementById('simulationCanvas');
         const ctx = canvas.getContext('2d');
-        const logBox = document.getElementById('log');
+        const container = document.getElementById('canvas-container');
+        const logBox = document.getElementById('terminal-log');
 
+        let chaosFactor = 1.0;
+        let echoRetention = 0.95; // Controls trail fade length
+        let isPurging = false;
+        let purgeProgress = 0;
+
+        // Resize Canvas
         function resize() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
         }
         window.addEventListener('resize', resize);
         resize();
 
-        // System state
-        let coreGravity = 50;
-        let chaosLevel = 30;
-        let planets = [
-            { name: "Logic Engine", radius: 100, angle: 0, speed: 0.02, weight: 60, color: "#38bdf8" },
-            { name: "Creative Drive", radius: 140, angle: 1, speed: 0.015, weight: 40, color: "#f472b6" },
-            { name: "Ethical Guard", radius: 180, angle: 2, speed: 0.01, weight: 80, color: "#4ade80" },
-            { name: "Emotional Context", radius: 220, angle: 3, speed: 0.008, weight: 30, color: "#fbbf24" },
-            { name: "Survival Instinct", radius: 260, angle: 4, speed: 0.007, weight: 70, color: "#f87171" },
-            { name: "Memory Database", radius: 300, angle: 5, speed: 0.005, weight: 50, color: "#c084fc" },
-            { name: "Intent Filter", radius: 340, angle: 6, speed: 0.004, weight: 45, color: "#2dd4bf" }
-        ];
+        // System Config: 7 Personas (The Sun, 4 Planets, 2 Moons)
+        const system = {
+            core: { x: 0, y: 0, radius: 24, pulse: 0, color: '#ffac33', name: 'Core Attractor' },
+            bodies: [
+                { id: 1, name: 'Logic Facet', distance: 90, speed: 0.015, size: 10, angle: 0, color: '#58a6ff' },
+                { id: 2, name: 'Creative Intuition', distance: 150, speed: -0.01, size: 12, angle: 1.5, color: '#bc8cff' },
+                { id: 3, name: 'Safety Guard', distance: 210, speed: 0.007, size: 14, angle: 3, color: '#3fb950' },
+                { id: 4, name: 'Aggressive Drive (Id)', distance: 280, speed: 0.022, size: 8, angle: 4.5, color: '#f85149' },
+                { id: 5, name: 'Regulatory Moon A', distance: 30, speed: 0.06, size: 4, angle: 0, parentIdx: 1, color: '#8b949e' },
+                { id: 6, name: 'Regulatory Moon B', distance: 35, speed: -0.04, size: 5, angle: 2, parentIdx: 2, color: '#8b949e' }
+            ],
+            asteroids: []
+        };
 
-        let asteroids = [];
-        function initAsteroids() {
-            asteroids = [];
-            for(let i=0; i<120; i++) {
-                let r = 200 + Math.random() * 80;
-                if(Math.random() > 0.5) r = 110 + Math.random() * 40; 
-                asteroids.push({
-                    radius: r,
-                    angle: Math.random() * Math.PI * 2,
-                    speed: (0.005 + Math.random() * 0.01) * (Math.random() > 0.5 ? 1 : -1),
-                    size: 1 + Math.random() * 2
-                });
-            }
-        }
-        initAsteroids();
-
-        let isCollapsing = false;
-        let collapseProgress = 0;
-
-        // UI Listeners
-        document.getElementById('param-core').addEventListener('input', (e) => {
-            coreGravity = parseInt(e.target.value);
-            document.getElementById('val-core').innerText = coreGravity;
-        });
-        document.getElementById('param-chaos').addEventListener('input', (e) => {
-            chaosLevel = parseInt(e.target.value);
-            document.getElementById('val-chaos').innerText = chaosLevel;
-            initAsteroids();
-        });
-        document.querySelectorAll('.planet-slide').forEach(slide => {
-            slide.addEventListener('input', (e) => {
-                let idx = parseInt(e.target.getAttribute('data-idx'));
-                planets[idx].weight = parseInt(e.target.value);
-                document.getElementById('val-p' + (idx+1)).innerText = planets[idx].weight;
+        // Populate Asteroid Belt (Raw Noise Debris)
+        for(let i=0; i<60; i++) {
+            system.asteroids.push({
+                distance: 170 + Math.random() * 25,
+                speed: 0.005 + Math.random() * 0.01,
+                angle: Math.random() * Math.PI * 2,
+                size: 1 + Math.random() * 2
             });
+        }
+
+        // Sliders Input Listeners
+        document.getElementById('chaos-slider').addEventListener('input', (e) => {
+            chaosFactor = parseFloat(e.target.value);
+            document.getElementById('chaos-val').innerText = chaosFactor.toFixed(1);
         });
-        document.getElementById('trigger-collapse').addEventListener('click', () => {
-            if(isCollapsing) return;
-            isCollapsing = true;
-            collapseProgress = 1.0;
-            logBox.innerHTML += "<br><span style='color:#ef4444;'>[CRITICAL] Singular collapse active. Defragmenting manifold...</span>";
-            logBox.scrollTop = logBox.scrollHeight;
+        document.getElementById('echo-slider').addEventListener('input', (e) => {
+            echoRetention = parseFloat(e.target.value);
+            document.getElementById('echo-val').innerText = echoRetention.toFixed(2);
+        });
+        document.getElementById('purge-btn').addEventListener('click', () => {
+            if(!isPurging) {
+                isPurging = true;
+                purgeProgress = 0;
+                terminalPrint("CRITICAL WARN: Initializing Singular Black Hole Purge...");
+            }
         });
 
-        // Loop
-        function animate() {
-            ctx.fillStyle = 'rgba(11, 14, 20, 0.2)';
+        function terminalPrint(text) {
+            logBox.innerHTML += `<br>> ${text}`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        // Main Animation Engine Loop
+        function draw() {
+            // Quantum Echo Pond Mapping: Fade background slowly to trap movement trails (Echoes)
+            ctx.fillStyle = `rgba(13, 17, 23, ${1 - echoRetention})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // Render Core System Barycenter / Gravitational Well
+            system.core.pulse += 0.03;
+            let currentCoreRadius = system.core.radius + Math.sin(system.core.pulse) * 2;
             
-            const cx = canvas.width / 2;
-            const cy = canvas.height / 2;
-            
-            // Draw Core
-            let currentCoreSize = 15 + (coreGravity / 10);
-            if(isCollapsing) {
-                currentCoreSize = currentCoreSize * (0.3 + Math.abs(Math.sin(Date.now()*0.02))*0.2);
-            }
-            
-            let grad = ctx.createRadialGradient(cx, cy, 2, cx, cy, currentCoreSize);
-            if(isCollapsing) {
-                grad.addColorStop(0, '#ffffff');
-                grad.addColorStop(0.3, '#c084fc');
-                grad.addColorStop(1, 'transparent');
+            if (isPurging) {
+                ctx.fillStyle = '#ffffff';
+                currentCoreRadius = system.core.radius * (1 - purgeProgress);
             } else {
-                grad.addColorStop(0, '#4ade80');
-                grad.addColorStop(0.5, 'rgba(74, 222, 128, 0.4)');
+                let grad = ctx.createRadialGradient(centerX, centerY, 2, centerX, centerY, currentCoreRadius * 2);
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(0.3, system.core.color);
                 grad.addColorStop(1, 'transparent');
+                ctx.fillStyle = grad;
             }
-            ctx.fillStyle = grad;
             ctx.beginPath();
-            ctx.arc(cx, cy, currentCoreSize, 0, Math.PI*2);
+            ctx.arc(centerX, centerY, isPurging ? Math.max(2, currentCoreRadius) : currentCoreRadius * 1.5, 0, Math.PI * 2);
             ctx.fill();
 
-            // Calculate barycentric drift based on planet vectors
-            let totalX = 0, totalY = 0, totalWeight = 0;
-
-            // Draw orbits and planets
-            planets.forEach((p, i) => {
-                p.angle += p.speed * (1 + chaosLevel/100);
+            // Render Asteroid Belt Noise Field
+            ctx.fillStyle = 'rgba(139, 148, 158, 0.4)';
+            system.asteroids.forEach(ast => {
+                if(!isPurging) ast.angle += ast.speed * chaosFactor;
+                else ast.distance = Math.max(0, ast.distance - 4);
                 
-                let currentRadius = p.radius;
-                if(isCollapsing) {
-                    currentRadius = p.radius * collapseProgress;
+                let ax = centerX + Math.cos(ast.angle) * ast.distance;
+                let ay = centerY + Math.sin(ast.angle) * ast.distance;
+                ctx.beginPath();
+                ctx.arc(ax, ay, ast.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Tracking Vectors for Wave Collapse Intersections
+            let activeIntersections = [];
+
+            // Update & Render Planetary Trajectories
+            system.bodies.forEach((body) => {
+                if (!isPurging) {
+                    body.angle += body.speed;
                 }
 
-                let px = cx + Math.cos(p.angle) * currentRadius;
-                let py = cy + Math.sin(p.angle) * currentRadius;
-                
-                totalX += Math.cos(p.angle) * p.weight;
-                totalY += Math.sin(p.angle) * p.weight;
-                totalWeight += p.weight;
+                let bx, by;
+                if (body.parentIdx !== undefined) {
+                    // Moon Coordinates relative to Planet parent node
+                    let parent = system.bodies[body.parentIdx];
+                    let px = centerX + Math.cos(parent.angle) * parent.distance;
+                    let py = centerY + Math.sin(parent.angle) * parent.distance;
+                    if(isPurging) body.distance = Math.max(0, body.distance - 2);
+                    bx = px + Math.cos(body.angle) * body.distance;
+                    by = py + Math.sin(body.angle) * body.distance;
+                } else {
+                    // Standard Planet Path Orbit
+                    if(isPurging) body.distance = Math.max(0, body.distance - 3);
+                    bx = centerX + Math.cos(body.angle) * body.distance;
+                    by = centerY + Math.sin(body.angle) * body.distance;
+                }
 
-                // Draw Orbit Track
-                ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+                // Render continuous field circles (The Intersections Matrix)
+                ctx.strokeStyle = body.color + '15'; 
                 ctx.lineWidth = 1;
                 ctx.beginPath();
-                ctx.arc(cx, cy, currentRadius, 0, Math.PI*2);
+                ctx.arc(bx, by, body.size * 4 * chaosFactor, 0, Math.PI * 2);
                 ctx.stroke();
 
-                // Draw Planet
-                ctx.fillStyle = p.color;
+                // Draw Core Solid mass node
+                ctx.fillStyle = body.color;
                 ctx.beginPath();
-                ctx.arc(px, py, 6 + (p.weight/20), 0, Math.PI*2);
+                ctx.arc(bx, by, Math.max(1, body.size * (1 - purgeProgress)), 0, Math.PI * 2);
                 ctx.fill();
-                
-                // Active field glow
-                ctx.fillStyle = p.color + '1a';
-                ctx.beginPath();
-                ctx.arc(px, py, 20 + p.weight, 0, Math.PI*2);
-                ctx.fill();
-            });
 
-            // Asteroid belt
-            ctx.fillStyle = 'rgba(148, 163, 184, 0.6)';
-            asteroids.forEach(ast => {
-                ast.angle += ast.speed * (1 + chaosLevel/50);
-                let currentAstRad = ast.radius;
-                if(isCollapsing) {
-                    currentAstRad = ast.radius * collapseProgress;
-                }
-                let ax = cx + Math.cos(ast.angle) * currentAstRad;
-                let ay = cy + Math.sin(ast.angle) * currentAstRad;
-                
-                // Add noise based on chaos parameter
-                if(chaosLevel > 0) {
-                    ax += (Math.random() - 0.5) * (chaosLevel / 10);
-                    ay += (Math.random() - 0.5) * (chaosLevel / 10);
-                }
-
-                ctx.beginPath();
-                ctx.arc(ax, ay, ast.size, 0, Math.PI*2);
-                ctx.fill();
-            });
-
-            // Calculate exact convergent barycenter
-            if(totalWeight > 0 && !isCollapsing) {
-                let bx = cx + (totalX / totalWeight) * 80;
-                let by = cy + (totalY / totalWeight) * 80;
-                
-                // Draw crosshair for the decision point
-                ctx.strokeStyle = '#ef4444';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(bx - 10, by); ctx.lineTo(bx + 10, by);
-                ctx.moveTo(bx, by - 10); ctx.lineTo(bx, by + 10);
-                ctx.stroke();
-                
-                // Label vector target
-                ctx.fillStyle = '#ef4444';
-                ctx.font = '10px monospace';
-                ctx.fillText(`Convergence Target: [${(bx-cx).toFixed(1)}, ${(by-cy).toFixed(1)}]`, bx + 12, by + 4);
-                
-                if(Math.random() < 0.02) {
-                    logBox.innerHTML = `Barycentric equilibrium aligned.<br>Vector drift: ${((totalX/totalWeight)).toFixed(3)} rad.<br>Resonant lock: stable.`;
-                }
-            }
-
-            if(isCollapsing) {
-                collapseProgress -= 0.01;
-                if(collapseProgress <= 0.05) {
-                    isCollapsing = false;
-                    collapseProgress = 1.0;
-                    logBox.innerHTML = "<span style='color:#4ade80;'>[SUCCESS] Manifold cleared. System data optimized. Stable configurations restored.</span>";
-                }
-            }
-
-            requestAnimationFrame(animate);
-        }
-        animate();
-    </script>
-</body>
-</html>
+if(!isPurging && body.parentIdx === undefined) {activeIntersections.push({x: bx, y: by});}});// Calculate Wave Collapse Vector Crosshair Destination (Live Resonant Center)if (activeIntersections.length > 0 && !isPurging) {let targetX = activeIntersections.reduce((sum, p) => sum + p.x, 0) / activeIntersections.length;let targetY = activeIntersections.reduce((sum, p) => sum + p.y, 0) / activeIntersections.length;ctx.strokeStyle = 'rgba(88, 166, 255, 0.6)';ctx.lineWidth = 1.5;ctx.setLineDash([4, 4]);// Render crosshair vector target boxctx.beginPath();ctx.arc(targetX, targetY, 8, 0, Math.PI * 2);ctx.moveTo(targetX - 15, targetY); ctx.lineTo(targetX + 15, targetY);ctx.moveTo(targetX, targetY - 15); ctx.lineTo(targetX, targetY + 15);ctx.stroke();ctx.setLineDash([]);}// Manage Purge Execution Physicsif (isPurging) {purgeProgress += 0.01;if(Math.random() < 0.15) terminalPrint(Defragmenting address range space: NULLIFY_DATA_BLOCK_${Math.floor(Math.random()*900)});if (purgeProgress >= 1) {isPurging = false;purgeProgress = 0;// Reset positions perfectly following singularity optimizationsystem.bodies.forEach(b => b.distance = b.parentIdx !== undefined ? (b.id === 5 ? 30 : 35) : (b.id===1?90:b.id===2?150:b.id===3?210:280));for(let i=0; i<60; i++) system.asteroids[i].distance = 170 + Math.random() * 25;terminalPrint("SUCCESS: Topological cleanup complete. Perfect barycentric alignment achieved.");}}requestAnimationFrame(draw);}draw();
