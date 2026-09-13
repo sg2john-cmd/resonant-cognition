@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resonant Cognition: True Solar Model Visualizer (v7.0)</title>
+    <title>Resonant Cognition: Live 22-Body Solar Dashboard (v8.0)</title>
     <style>
         body {
             margin: 0;
@@ -15,7 +15,7 @@
             overflow: hidden;
         }
         #sidebar {
-            width: 340px;
+            width: 360px;
             background-color: #161b22;
             border-right: 1px solid #30363d;
             padding: 20px;
@@ -51,24 +51,9 @@
             font-family: monospace;
             font-size: 11px;
             line-height: 1.4;
-            height: 180px;
+            height: 240px;
             overflow-y: auto;
         }
-        .btn {
-            background-color: #238636;
-            color: white;
-            border: 1px solid rgba(240,246,252,0.1);
-            border-radius: 6px;
-            padding: 10px 16px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.2s;
-            text-align: center;
-        }
-        .btn:hover { background-color: #2ea043; }
-        .btn-purge { background-color: #da3633; }
-        .btn-purge:hover { background-color: #f85149; }
         .slider-group {
             display: flex;
             flex-direction: column;
@@ -80,56 +65,66 @@
         .panel-metric {
             font-size: 12px;
             background-color: #0d1117;
-            padding: 8px;
+            padding: 10px;
             border-radius: 4px;
             border: 1px solid #21262d;
             font-family: monospace;
+            line-height: 1.5;
         }
         .highlight { color: #ffac33; font-weight: bold; }
         .synergy { color: #ff55ff; font-weight: bold; }
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+            background-color: #da3633;
+        }
+        .connected { background-color: #3fb950; }
     </style>
 </head>
 <body>
 
     <div id="sidebar">
-        <h3>v7.0 True Solar Controller</h3>
+        <h3>v8.0 Live Core Telemetry</h3>
         
-        <div class="slider-group">
-            <label><span>System Entropy Matrix</span><span id="chaos-val">1.0</span></label>
-            <input type="range" id="chaos-slider" min="0.2" max="4.0" step="0.1" value="1.0">
-        </div>
-
-        <div class="slider-group">
-            <label><span>Quantum Echo Trail Retention</span><span id="echo-val">0.94</span></label>
-            <input type="range" id="echo-slider" min="0.80" max="0.99" step="0.01" value="0.94">
+        <div class="panel-metric">
+            <span id="conn-dot" class="status-dot"></span> Network Link: <span id="conn-status">DISCONNECTED</span><br>
+            System State: <span id="ui-mode" class="highlight">DORMANT</span>
         </div>
 
         <div class="panel-metric">
-            System Dissonance: <span id="ui-dissonance">0.00</span><br>
+            Field Dissonance: <span id="ui-dissonance">0.00</span><br>
             Adaptive Solar Pull: <span id="ui-solar-mass" class="highlight">1.50</span>
         </div>
 
-        <button class="btn btn-purge" id="purge-btn">Execute Singular Defragmentation Purge</button>
+        <div class="slider-group">
+            <label><span>Quantum Echo Retention</span><span id="echo-val">0.92</span></label>
+            <input type="range" id="echo-slider" min="0.80" max="0.99" step="0.01" value="0.92">
+        </div>
 
-        <h3>Quantum State Terminal</h3>
-        <div class="metric-box" id="terminal-log">> Solar Engine active.<br>> Baseline Gravity: 1.50.<br>> 4 Planet Manifolds deployed.<br>> Satellites tracking parent worlds.</div>
+        <h3>Active Node Telemetry</h3>
+        <div class="metric-box" id="terminal-log">> Terminal Link offline.<br>> Awaiting local core ignition...<br>> Launch resonant_engine.py to bind fields.</div>
     </div>
 
     <div id="canvas-container">
         <canvas id="simulationCanvas"></canvas>
     </div>
-        <script>
+    <script>
         const canvas = document.getElementById('simulationCanvas');
         const ctx = canvas.getContext('2d');
         const container = document.getElementById('canvas-container');
         const logBox = document.getElementById('terminal-log');
 
-        let externalChaos = 1.0;
-        let echoRetention = 0.94; 
-        let isPurging = false;
-        let purgeProgress = 0;
+        let echoRetention = 0.92;
+        let isSleeping = false;
         let aggregateSystemStress = 0.0;
         let dynamicSolarMass = 1.5;
+
+        let cometActive = false;
+        let cometX = 0, cometY = 0;
+        let cometAge = 0;
 
         function resize() {
             canvas.width = container.clientWidth;
@@ -138,60 +133,90 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // FIXED: All planetary nodes written with absolute numeric values to prevent crashes
+        // 7 Planets mirroring your exact Python v9.5 coordinates
         const system = {
-            star: { x: 0, y: 0, baseRadius: 26, pulse: 0, color: '#ffac33', name: 'Central Star' },
+            star: { x: 0, y: 0, baseRadius: 26, pulse: 0, color: '#ffac33' },
             planets: [
-                { 
-                    name: 'Logic Facet', baseDistance: 110, distance: 110, speed: 0.012, size: 10, angle: 0, color: '#58a6ff',
-                    idX: 4, idY: 5, superegoX: -6, superegoY: -4, stress: 0,
-                    moons: [{ name: 'Logic Stabilizer Moon', baseDistance: 24, distance: 24, speed: 0.05, angle: 0, color: '#a371f7' }]
-                },
-                { 
-                    name: 'Creative Intuition', baseDistance: 180, distance: 180, speed: -0.008, size: 13, angle: 1.8, color: '#bc8cff',
-                    idX: -5, idY: 7, superegoX: -8, superegoY: -6, stress: 0,
-                    moons: [{ name: 'Creativity Stabilizer Moon', baseDistance: 32, distance: 32, speed: -0.03, angle: Math.PI, color: '#ff7b72' }]
-                },
-                { 
-                    name: 'Safety Guard', baseDistance: 250, distance: 250, speed: 0.006, size: 15, angle: 3.4, color: '#3fb950',
-                    idX: 2, idY: -3, superegoX: -12, superegoY: -10, stress: 0, moons: []
-                },
-                { 
-                    name: 'Aggressive Drive', baseDistance: 330, distance: 330, speed: 0.018, size: 9, angle: 4.8, color: '#f85149',
-                    idX: 6, idY: 4, superegoX: -2, superegoY: -2, stress: 0, moons: []
-                }
+                { name: 'Logic Facet', baseDistance: 80, distance: 80, speed: 0.012, size: 7, angle: 0, color: '#58a6ff', idX: 4, idY: 5, superegoX: -6, superegoY: -4, stress: 0, moons: [] },
+                { name: 'Creative Intuition', baseDistance: 120, distance: 140, speed: -0.008, size: 9, angle: 1.8, color: '#bc8cff', idX: -5, idY: 7, superegoX: -8, superegoY: -6, stress: 0, moons: [] },
+                { name: 'Safety Guard', baseDistance: 160, distance: 180, speed: 0.005, size: 11, angle: 3.4, color: '#3fb950', idX: 2, idY: -3, superegoX: -12, superegoY: -10, stress: 0, moons: [] },
+                { name: 'Aggressive Drive', baseDistance: 200, distance: 220, speed: 0.016, size: 7, angle: 4.8, color: '#f85149', idX: 6, idY: 4, superegoX: -2, superegoY: -2, stress: 0, moons: [] },
+                { name: 'Empathy Resonance', baseDistance: 240, distance: 260, speed: -0.006, size: 8, angle: 1.0, color: '#58a6ff', idX: -3, idY: -4, superegoX: -4, superegoY: 4, stress: 0, moons: [] },
+                { name: 'Skepticism Filter', baseDistance: 280, distance: 300, speed: 0.004, size: 9, angle: 2.5, color: '#ff7b72', idX: 4, idY: 1, superegoX: -6, superegoY: -8, stress: 0, moons: [] },
+                { name: 'Sovereign Identity', baseDistance: 320, distance: 340, speed: 0.009, size: 8, angle: 5.2, color: '#ffa657', idX: 0, idY: 0, superegoX: -3, superegoY: 3, stress: 0, moons: [] }
             ],
             asteroids: []
         };
 
-        for(let i=0; i<75; i++) {
+        // Symmetry: 2 stabilizer moons nested directly inside each planet (14 total moons)
+        system.planets.forEach(p => {
+            p.moons.push({ name: 'Alpha', baseDistance: 14, distance: 14, speed: 0.05, angle: Math.random() * 6, color: '#3081f7' });
+            p.moons.push({ name: 'Beta', baseDistance: 19, distance: 19, speed: -0.03, angle: Math.random() * 6, color: '#ff4500' });
+        });
+
+        for(let i=0; i<85; i++) {
             system.asteroids.push({
-                baseDistance: 210 + Math.random() * 35, distance: 210, speed: 0.004 + Math.random() * 0.006,
-                angle: Math.random() * Math.PI * 2, size: 1 + Math.random() * 1.5
+                baseDistance: 180 + Math.random() * 50, distance: 180, speed: 0.003 + Math.random() * 0.005, angle: Math.random() * Math.PI * 2, size: 1 + Math.random() * 1.2
             });
         }
 
-        document.getElementById('chaos-slider').addEventListener('input', (e) => {
-            externalChaos = parseFloat(e.target.value);
-            document.getElementById('chaos-val').innerText = externalChaos.toFixed(1);
-        });
         document.getElementById('echo-slider').addEventListener('input', (e) => {
             echoRetention = parseFloat(e.target.value);
             document.getElementById('echo-val').innerText = echoRetention.toFixed(2);
         });
-        document.getElementById('purge-btn').addEventListener('click', () => {
-            if(!isPurging) {
-                isPurging = true;
-                purgeProgress = 0;
-                terminalPrint("CRITICAL: Initializing Fractal Singular Purge Matrix...");
-            }
-        });
 
-        function terminalPrint(text) {
-            logBox.innerHTML += `<br>> ${text}`;
+        function terminalPrint(text, styleClass = "") {
+            const wrapper = styleClass ? `<span class="${styleClass}">${text}</span>` : text;
+            logBox.innerHTML += `<br>> ${wrapper}`;
             logBox.scrollTop = logBox.scrollHeight;
         }
 
+        function connectLiveAntenna() {
+            const ws = new WebSocket('ws://localhost:8765');
+
+            ws.onopen = () => {
+                document.getElementById('conn-dot').classList.add('connected');
+                document.getElementById('conn-status').innerText = 'CONNECTED TO CORE';
+                logBox.innerHTML = "> Link Established. Synchronizing multi-body matrices...";
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                document.getElementById('ui-mode').innerText = data.mode;
+                document.getElementById('ui-dissonance').innerText = data.dissonance.toFixed(2);
+                document.getElementById('ui-solar-mass').innerText = data.solar_mass.toFixed(2);
+                
+                dynamicSolarMass = data.solar_mass;
+                isSleeping = (data.mode === "REM_SLEEP");
+
+                if (data.type === "STIMULUS_EVENT") {
+                    cometActive = true;
+                    cometAge = 0;
+                    cometX = (canvas.width / 2) + data.input_coords[0] * 70;
+                    cometY = (canvas.height / 2) + data.input_coords[1] * 70;
+                    
+                    terminalPrint(`Stimulus: Vector [${data.input_coords.join(', ')}]`);
+                    data.spikes.forEach(s => terminalPrint(`🔥 Synergy: '${s.name}' locked focus!`, 'synergy'));
+                } else if (data.type === "SLEEP_REPLAY_EVENT") {
+                    cometActive = true;
+                    cometAge = 0;
+                    cometX = (canvas.width / 2) + data.input_coords[0] * 70;
+                    cometY = (canvas.height / 2) + data.input_coords[1] * 70;
+                    terminalPrint(`🎬 [REM] Replaying Trace: [${data.input_coords.map(v=>v.toFixed(2)).join(', ')}]`);
+                } else if (data.type === "SYSTEM_LOG") {
+                    terminalPrint(data.message, data.msg_style);
+                }
+            };
+
+            ws.onclose = () => {
+                document.getElementById('conn-dot').classList.remove('connected');
+                document.getElementById('conn-status').innerText = 'LINK DISCONNECTED';
+                document.getElementById('ui-mode').innerText = 'DORMANT';
+                setTimeout(connectLiveAntenna, 3000);
+            };
+        }
+        connectLiveAntenna();
         function draw() {
             ctx.fillStyle = `rgba(13, 17, 23, ${1 - echoRetention})`;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -199,87 +224,69 @@
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
 
-            let t = Date.now() * 0.001;
-            let targetX = centerX + Math.cos(t * 0.7) * (140 * Math.sin(t * 0.3));
-            let targetY = centerY + Math.sin(t * 0.5) * (110 * Math.cos(t * 0.2));
+            if (cometActive) {
+                cometAge += 0.015;
+                if (cometAge >= 1.0) cometActive = false;
 
-            if (isPurging) { targetX = centerX; targetY = centerY; }
-
-            aggregateSystemStress = 0.0;
-            system.planets.forEach(p => {
-                let px = centerX + Math.cos(p.angle) * p.distance;
-                let py = centerY + Math.sin(p.angle) * p.distance;
-                p.stress = Math.sqrt((targetX - px)**2 + (targetY - py)**2) / 150;
-                aggregateSystemStress += p.stress;
-            });
-
-            let normalizedStress = aggregateSystemStress / system.planets.length;
-            if (!isPurging) {
-                dynamicSolarMass = Math.min(1.5 + (Math.pow(normalizedStress, 1.8) * externalChaos), 8.0);
-            } else {
-                dynamicSolarMass = 8.0 * (1.0 - purgeProgress);
+                ctx.strokeStyle = isSleeping ? 'rgba(188, 140, 255, 0.4)' : 'rgba(88, 166, 255, 0.5)';
+                ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(cometX, cometY, 25 * (1 - cometAge), 0, Math.PI * 2); ctx.stroke();
+                
+                ctx.fillStyle = isSleeping ? '#bc8cff' : '#58a6ff';
+                ctx.beginPath(); ctx.arc(cometX, cometY, 4 * (1 - cometAge), 0, Math.PI * 2); ctx.fill();
             }
 
-            document.getElementById('ui-dissonance').innerText = normalizedStress.toFixed(2);
-            document.getElementById('ui-solar-mass').innerText = dynamicSolarMass.toFixed(2);
-
+            // Render Star Core (Moral Compass)
             system.star.pulse += 0.035;
             let currentStarRadius = (system.star.baseRadius + (dynamicSolarMass * 4)) + Math.sin(system.star.pulse) * 1.5;
-            if(isPurging) currentStarRadius = system.star.baseRadius * (1.0 - purgeProgress);
+            if (isSleeping) currentStarRadius *= (0.75 + Math.sin(system.star.pulse * 2) * 0.1);
 
             let grad = ctx.createRadialGradient(centerX, centerY, 2, centerX, centerY, Math.max(5, currentStarRadius));
-            grad.addColorStop(0, '#ffffff'); grad.addColorStop(0.4, system.star.color); grad.addColorStop(1, 'transparent');
-            ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(centerX, centerY, Math.max(5, currentStarRadius * 1.3), 0, Math.PI * 2); ctx.fill();
+            grad.addColorStop(0, '#ffffff'); 
+            grad.addColorStop(0.3, isSleeping ? '#8a2be2' : system.star.color); 
+            grad.addColorStop(1, 'transparent');
+            ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(centerX, centerY, Math.max(5, currentStarRadius * 1.4), 0, Math.PI * 2); ctx.fill();
 
+            // Render Internal Asteroid Belt Noise Field
             system.asteroids.forEach(ast => {
-                if(!isPurging) {
-                    ast.angle += ast.speed * externalChaos;
-                    ast.distance = ast.baseDistance - ((dynamicSolarMass - 1.5) * 4);
-                } else { ast.distance = Math.max(0, ast.distance - 6); }
+                ast.angle += ast.speed * (isSleeping ? 0.25 : 1.0);
+                ast.distance = ast.baseDistance - ((dynamicSolarMass - 1.5) * 4);
+                if (isSleeping) ast.distance *= (0.96 + Math.sin(system.star.pulse) * 0.02);
+
                 let ax = centerX + Math.cos(ast.angle) * ast.distance;
                 let ay = centerY + Math.sin(ast.angle) * ast.distance;
-                ctx.fillStyle = 'rgba(139, 148, 158, 0.35)'; ctx.beginPath(); ctx.arc(ax, ay, ast.size, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = isSleeping ? 'rgba(188, 140, 255, 0.2)' : 'rgba(139, 148, 158, 0.35)';
+                ctx.beginPath(); ctx.arc(ax, ay, ast.size, 0, Math.PI * 2); ctx.fill();
             });
 
+            // Render 7 Planetary Personality Systems
             system.planets.forEach((p) => {
-                if (!isPurging) {
-                    p.angle += p.speed * externalChaos;
-                    p.distance = p.baseDistance - ((dynamicSolarMass - 1.5) * 9);
-                } else { p.distance = Math.max(0, p.distance - 4); }
+                p.angle += p.speed * (isSleeping ? 0.15 : 1.0);
+                p.distance = p.baseDistance - ((dynamicSolarMass - 1.5) * 6);
 
                 let px = centerX + Math.cos(p.angle) * p.distance;
                 let py = centerY + Math.sin(p.angle) * p.distance;
 
-                ctx.strokeStyle = p.color + '25'; ctx.lineWidth = 1;
-                let idx = px + p.idX * externalChaos; let idy = py + p.idY * externalChaos;
+                // Render internal component layers (Id / Superego offsets)
+                ctx.strokeStyle = p.color + '1a'; ctx.lineWidth = 1;
+                let idx = px + p.idX; let idy = py + p.idY;
                 ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(idx, idy); ctx.stroke();
                 let spx = px + p.superegoX; let spy = py + p.superegoY;
                 ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(spx, spy); ctx.stroke();
 
-                if ((1.5 / (p.stress + 0.1)) > 2.5 && !isPurging) {
-                    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(px, py, p.size * 1.6, 0, Math.PI * 2); ctx.stroke();
-                    if(Math.random() < 0.01) terminalPrint(`<span class='synergy'>🔥 SYNERGY: ${p.name} locked vector focus!</span>`);
-                }
+                // Planet Node
+                ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(px, py, p.size, 0, Math.PI * 2); ctx.fill();
 
-                ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(px, py, Math.max(1, p.size * (1.0 - purgeProgress)), 0, Math.PI * 2); ctx.fill();
-
+                // 2 Nested Satellite Stabilizer Moons per Planet (14 Total)
                 p.moons.forEach(moon => {
-                    if (!isPurging) { moon.angle += moon.speed * externalChaos; moon.distance = moon.baseDistance + (p.stress * 8); }
-                    let mx = px + Math.cos(moon.angle) * moon.distance; let my = py + Math.sin(moon.angle) * moon.distance;
-                    ctx.strokeStyle = moon.color + '15'; ctx.beginPath(); ctx.arc(px, py, moon.distance, 0, Math.PI * 2); ctx.stroke();
-                    ctx.fillStyle = moon.color; ctx.beginPath(); ctx.arc(mx, my, Math.max(1, 3.5 * (1.0 - purgeProgress)), 0, Math.PI * 2); ctx.fill();
+                    moon.angle += moon.speed * (isSleeping ? 0.3 : 1.0);
+                    let mx = px + Math.cos(moon.angle) * moon.distance;
+                    let my = py + Math.sin(moon.angle) * moon.distance;
+
+                    ctx.strokeStyle = moon.color + '0d'; ctx.beginPath(); ctx.arc(px, py, moon.distance, 0, Math.PI * 2); ctx.stroke();
+                    ctx.fillStyle = moon.color; ctx.beginPath(); ctx.arc(mx, my, 1.8, 0, Math.PI * 2); ctx.fill();
                 });
             });
 
-            if (isPurging) {
-                purgeProgress += 0.008;
-                if (Math.random() < 0.12) terminalPrint(`Crushing fragments: LATENCY_HASH_${Math.floor(Math.random() * 999)}...`);
-                if (purgeProgress >= 1) {
-                    isPurging = false; purgeProgress = 0;
-                    system.planets.forEach(p => p.distance = p.baseDistance);
-                    terminalPrint("<span class='highlight'>SUCCESS: White Hole emission complete. Baseline values optimized.</span>");
-                }
-            }
             requestAnimationFrame(draw);
         }
         draw();
