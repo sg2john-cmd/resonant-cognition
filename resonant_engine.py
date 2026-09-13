@@ -2,6 +2,270 @@ import numpy as np
 import time
 import threading
 import sys
+
+class StructuralComponent:
+    """Represents internal Freudian drives (Id, Ego, Superego) inside a world node"""
+    def __init__(self, layer_type, coordinate_offset, energy):
+        self.layer_type = layer_type
+        self.offset = np.array(coordinate_offset, dtype=float)
+        self.energy = energy
+
+class DynamicMoon:
+    """A natural satellite orbiting a specific planet to act as a corrective force"""
+    def __init__(self, name, relative_offset_multiplier, weight):
+        self.name = name
+        self.offset_multiplier = relative_offset_multiplier
+        self.weight = weight
+        self.current_position = np.array([0.0, 0.0, 0.0])
+
+    def update_orbital_drift(self, parent_coords, system_core, stress_level):
+        """Calculates moon position based on parent stress along the core metric gradient"""
+        self.current_position = parent_coords + (system_core * (stress_level * self.offset_multiplier))
+        return self.current_position
+
+class CosmologicalPlanet:
+    """A multi-layered planetary body acting as a primary personality archetype"""
+    def __init__(self, name, base_coordinates, energy, semantic_volume):
+        self.name = name
+        self.base_coords = np.array(base_coordinates, dtype=float)
+        self.energy = energy
+        self.semantic_volume = semantic_volume
+        
+        # Internal Structural Layers
+        self.internal_layers = [
+            StructuralComponent("Id",        [0.4, 0.5, 0.3],  energy * 0.8),
+            StructuralComponent("Ego",       [0.0, 0.0, 0.0],  energy * 1.0),
+            StructuralComponent("Superego",  [-0.3, -0.4, -0.2], energy * 1.2)
+        ]
+        self.moons = []
+
+    def add_satellite(self, name, offset_multiplier, weight):
+        """Nests a stabilizer moon directly inside the planetary boundary context"""
+        self.moons.append(DynamicMoon(name, offset_multiplier, weight))
+
+    def calculate_fractal_density(self, input_vector):
+        """Calculates aggregate field density values across all internal component layers"""
+        total_density = 0.0
+        for layer in self.internal_layers:
+            abs_coords = self.base_coords + layer.offset
+            distance = np.linalg.norm(input_vector - abs_coords)
+            exponent = -(distance ** 2) / (2 * (self.semantic_volume ** 2))
+            total_density += layer.energy * np.exp(exponent)
+        return total_density
+class ResonantEngine:
+    def __init__(self):
+        # John's Solar Compass: Heavy moral baseline boundary field
+        self.central_star_barycenter = np.array([0.1, -0.8, -0.3])
+        self.base_solar_mass = 1.5
+        self.max_solar_mass = 8.0
+        
+        self.memory_history = []
+        self.last_input_time = time.time()
+        self.previous_action_vector = np.array([0.0, 0.0, 0.0])
+        self.standby_mode_active = False 
+        self.is_sleeping = False
+        
+        # True 7-Planet Grid Node Array
+        self.planets = [
+            CosmologicalPlanet("Logic Facet",         [1.2, -0.4, 0.2],  energy=3.0, semantic_volume=1.2),
+            CosmologicalPlanet("Creative Intuition", [-1.0, 1.4, -0.3],  energy=3.5, semantic_volume=1.8),
+            CosmologicalPlanet("Safety Guard",       [0.2, -1.2, -0.4],  energy=4.5, semantic_volume=0.8),
+            CosmologicalPlanet("Aggressive Drive",   [1.8, 1.0, 1.5],    energy=2.0, semantic_volume=2.0),
+            CosmologicalPlanet("Empathy Resonance",  [-0.5, -0.8, 0.8],  energy=2.8, semantic_volume=1.4),
+            CosmologicalPlanet("Skepticism Filter",  [0.8, 0.2, -0.9],   energy=3.2, semantic_volume=1.1),
+            CosmologicalPlanet("Sovereign Identity", [0.0, 0.0, 1.2],    energy=4.0, semantic_volume=1.0)
+        ]
+        
+        # Deploying 2 unique corrective moons inside EVERY single planet (14 total)
+        for p in self.planets:
+            p.add_satellite(f"{p.name} Alpha Moon", offset_multiplier=0.04, weight=1.0)
+            p.add_satellite(f"{p.name} Beta Moon",  offset_multiplier=0.06, weight=0.8)
+
+    def process_intent(self, environmental_input, active_will=1.2, seq_index=1, mode="EXTERNAL"):
+        input_vec = np.array(environmental_input, dtype=float)
+        self.last_input_time = time.time()
+        
+        momentum_ratio = 0.15
+        fused_input = (input_vec * (1.0 - momentum_ratio)) + (self.previous_action_vector * momentum_ratio)
+        
+        if mode == "EXTERNAL":
+            print(f"\n[EXTERNAL COMET STREAM {seq_index}] Input Vector: {input_vec}")
+        elif mode == "DREAM_REPLAY":
+            print(f"  🎬 [REM CYCLE] Replaying State Trace {seq_index}: {input_vec}")
+        else:
+            print(f"\n[{mode} INPUT] Vector: {input_vec}")
+
+        # Update 14 Nested Satellite Moons
+        moons_influence = np.zeros(3)
+        total_moon_weight = 0.0
+        aggregate_system_stress = 0.0
+        
+        for p in self.planets:
+            stress = np.linalg.norm(fused_input - p.base_coords)
+            aggregate_system_stress += stress
+            for moon in p.moons:
+                moon_pos = moon.update_orbital_drift(p.base_coords, self.central_star_barycenter, stress)
+                moons_influence += moon_pos * moon.weight
+                total_moon_weight += moon.weight
+
+        # Maya's Interconnected Gravity Balancing
+        normalized_stress = aggregate_system_stress / len(self.planets)
+        dynamic_solar_mass = self.base_solar_mass + (normalized_stress ** 1.8)
+        dynamic_solar_mass = min(dynamic_solar_mass, self.max_solar_mass)
+        
+        if mode == "EXTERNAL":
+            print(f"[ORBIT] 7-Planet Field Dissonance: {normalized_stress:.2f} | Adaptive Solar Pull: {dynamic_solar_mass:.2f}")
+
+        # Evaluate Planetary Fractal Densities
+        densities = {}
+        for p in self.planets:
+            densities[p.name] = p.calculate_fractal_density(fused_input) * active_will
+
+        # Phase Cancellation & Synergy Spikes
+        residual_weights = {}
+        for name, density in densities.items():
+            if density < 0.6:
+                residual_weights[name] = density * 0.05
+            else:
+                synergy_spike = density ** 2.2 
+                residual_weights[name] = synergy_spike
+                if mode == "EXTERNAL":
+                    print(f"  🔥 Constructive Resonance: '{name}' spiked (Weight: {synergy_spike:.2f})")
+
+        # Wave-Form Collapse across the 22-Body Field
+        decision_gradient = np.zeros(3) + (self.central_star_barycenter * dynamic_solar_mass)
+        decision_gradient += moons_influence
+        
+        total_weight = dynamic_solar_mass + total_moon_weight
+        for p in self.planets:
+            w = residual_weights[p.name]
+            decision_gradient += w * p.base_coords
+            total_weight += w
+            
+        final_action_vector = decision_gradient / total_weight
+        
+        if mode == "EXTERNAL" or mode == "STANDBY_DAWN":
+            self.memory_history.append(final_action_vector)
+            
+        self.previous_action_vector = final_action_vector
+        
+        if mode == "EXTERNAL":
+            print(f"[COLLAPSE] Unified 22-Body Action State: {final_action_vector}")
+        return final_action_vector
+    def execute_sleep_consolidation(self, triggered_by="MANUAL"):
+        """Triggers the time-bounded two-pass sleep filtration network loop"""
+        if not self.memory_history:
+            print(f"\n[SLEEP] Entry rejected. Memory buffers empty. No data to consolidate.")
+            return
+
+        self.is_sleeping = True
+        print(f"\n=================================================================")
+        print(f"       💤 INITIALIZING SYSTEMIC SLEEP CYCLE ({triggered_by} OVERRIDE)")
+        print(f"=================================================================")
+        print(f"[SLEEP] External comet arrays locked out. Core consciousness deactivated.")
+        print(f"[SLEEP] Total waking memory trace units queued: {len(self.memory_history)}")
+        time.sleep(1.0)
+
+        # PASS 1: Synaptic Dream Replay
+        print("\n🌙 PHASE I: Synaptic Replay Loop (Deep REM Processing)")
+        print("-----------------------------------------------------------------")
+        replayed_states = list(self.memory_history)
+        for idx, trace in enumerate(replayed_states, start=1):
+            self.process_intent(trace, active_will=0.7, seq_index=idx, mode="DREAM_REPLAY")
+            time.sleep(0.3)
+
+        # PASS 2: Synaptic Pruning & Singularity Compression
+        print("\n✨ PHASE II: Synaptic Pruning & Thermodynamic Consolidation")
+        print("-----------------------------------------------------------------")
+        print("  ↳ Auditing peripheral asteroid data blocks...")
+        time.sleep(0.5)
+        
+        distilled_axioms = np.mean(self.memory_history, axis=0)
+        self.memory_history.clear()
+        self.previous_action_vector = np.array([0.0, 0.0, 0.0]) # Reset cognitive load momentum
+        
+        print("  ↳ System redundancies successfully pruned. High-entropy static nullified.")
+        print("  ↳ Passing distilled axiom block past Event Horizon boundary horizon...")
+        time.sleep(0.5)
+
+        # PASS 3: The White Hole Awakening parameter shift
+        self.central_star_barycenter = (self.central_star_barycenter * 0.6) + (distilled_axioms * 0.4)
+        
+        print(f"\n[WHITE HOLE] Realignment Complete. New Solar Moral Base Matrix: {self.central_star_barycenter}")
+        print("=================================================================")
+        print("       🌅 COGNITIVE WAKING TRANSITION EXECUTED SUCCESSFUL")
+        print("=================================================================")
+        
+        # SELF-TERMINATION: Wake up natively by restoring waking states
+        self.is_sleeping = False
+        self.last_input_time = time.time()
+
+def idle_sleep_timer_worker(engine):
+    """Monitors terminal clock step timings to execute safe automatic sleep drop options"""
+    while True:
+        time.sleep(1.0)
+        if engine.standby_mode_active and not engine.is_sleeping:
+            if time.time() - engine.last_input_time >= 15.0 and len(engine.memory_history) > 0:
+                engine.execute_sleep_consolidation(triggered_by="AUTO_IDLE_TIMER")
+                print("\n[ACTIVE] Workstation back online.")
+                print(f"\n[Standby: ACTIVE] Enter input or command: ", end="", flush=True)
+
+if __name__ == "__main__":
+    engine = ResonantEngine()
+    
+    idle_worker = threading.Thread(target=idle_sleep_timer_worker, args=(engine,), daemon=True)
+    idle_worker.start()
+
+    print("=================================================================")
+    print("    RESONANT COGNITION WORKSTATION CORE ENGINE v9.0              ")
+    print("=================================================================")
+    print("MAPPED ASSETS:")
+    print("  1 Central Star Moral Compass | 7 Fractal Planetary Nodes")
+    print("  14 Stabilizer Satellite Moons Deploying Continuous Counter-Weights")
+    print("-----------------------------------------------------------------")
+    print("NEW COMMANDS:")
+    print("  'sleep'   - Manually forces system into Synaptic REM Consolidation loop")
+    print("  'standby' - Toggles autonomous background Auto-Idle Sleep Timer ON/OFF")
+    print("=================================================================")
+
+    while True:
+        try:
+            current_status = "ACTIVE" if engine.standby_mode_active else "DORMANT"
+            user_input = input(f"\n[Standby: {current_status}] Enter input or command: ").strip().lower()
+        except (KeyboardInterrupt, EOFError):
+            break
+            
+        if user_input == 'exit':
+            print("[SYSTEM] Shutting down processing fields safely. Goodbye.")
+            break
+        elif user_input == 'sleep':
+            engine.execute_sleep_consolidation(triggered_by="MANUAL_COMMAND")
+            continue
+        elif user_input == 'standby':
+            engine.standby_mode_active = not engine.standby_mode_active
+            status_text = "ENABLED (Auto-Idle Timer set to 15 seconds)" if engine.standby_mode_active else "DISABLED"
+            print(f"[TOGGLE] Standby Default Mode Network is now: {status_text}")
+            continue
+            
+        try:
+            if engine.is_sleeping:
+                print("[WARN] System state is locked in REM processing execution. Please wait for morning.")
+                continue
+                
+            raw_sequences = user_input.split('|')
+            for idx, raw_vector in enumerate(raw_sequences, start=1):
+                coords = [float(val) for val in raw_vector.strip().split(',')]
+                if len(coords) != 3:
+                    print(f"[ERROR] Sequence position {idx} invalid. Loop aborted.")
+                    break
+                engine.process_intent(coords, seq_index=idx, mode="EXTERNAL")
+                time.sleep(0.1)
+        except ValueError:
+            print("[ERROR] Invalid numeric configuration entry.")
+import numpy as np
+import time
+import threading
+import sys
 import math as Math
 
 class StructuralComponent:
