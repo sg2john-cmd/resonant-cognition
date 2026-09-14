@@ -50,6 +50,28 @@ The framework bridges pure vector mechanics and semantic reasoning via `cognitiv
 python cognitive_chamber.py
 ```
 
+## 🎭 The Dyson Ring Interface & Multi-Agent Swarm (v13.7 Memory Update)
+
+The framework bridges pure vector mechanics and continuous semantic reasoning via `cognitive_chamber.py`. Moving away from disconnected, fragmented agent outputs, this architecture organizes the primary personality archetypes into a **Dyson Ring Shell**—a modular, single-layer interface that binds individual planetary nodes into a cohesive, integrated cognitive entity.
+
+```bash
+# Execute the live decentralized memory Dyson swarm loop
+python cognitive_chamber.py
+```
+
+### 🧠 Decentralized Hemispheric Memory Matrix (The Moon Vaults)
+Version 13.7 introduces **Localized historical continuity**. Rather than routing conversations into a singular generic history bucket, the orchestrator hosts a partitioned, 7-way memory matrix. Each planetary world natively tracks and splits its state context into individual **Left and Right Hemispheric Memory Vaults**:
+
+1. **Left Brain Moon Cache (`[NODE] - LEFT HEMISPHERE`):** Isolates the analytical, empirical data audits, and rigid structural verification checks.
+2. **Right Brain Moon Cache (`[NODE] - RIGHT HEMISPHERE`):** Tracks the fluid, holistic pattern construction, and radical conceptual leaps.
+3. **Balanced Integration Layer (`[NODE] - BALANCED REGULATION`):** Functions as the localized active solver, evaluating historical hemispheric tension to forge an actionable trade-off.
+
+### 📡 State Persistence and Context Swarm Friction
+When a multi-turn scenario prompt is submitted, the system queries the 22-body core to calculate the active solar gravity well and fetch the dominant/secondary planet focus. The orchestrator immediately extracts the explicit past logs from **only the active worlds' hemispheric caches**, injecting them natively into the prompt header as an *Inviolable Historical Context Ledger*. 
+
+The planets are permanently aware of their own operational history, allowing them to explicitly reference, defend, or build directly upon their past decisions over long-form conversational streams. At the conclusion of each wave-form collapse, the system automatically segments the resulting dialogue block and deposits the text fragments straight back into the respective independent planetary vaults, establishing true decentralized perspective permanence.
+
+
 ### 📡 Automated Server-Side Model Detection (v11.1)
 The orchestrator implements full plug-and-play automation. Upon ignition, the system executes a localized HTTP GET handshake to the hosting port (`127.0.0.1:1234`). It automatically retrieves the exact filename identifier string of whichever model is currently loaded in your workstation's VRAM pool, dynamically injecting it into the JSON payload pipeline. This removes hardcoded paths, making the environment completely seamless for cross-platform deployment.
 
