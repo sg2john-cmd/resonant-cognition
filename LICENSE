@@ -1,109 +1,56 @@
-# License Terms
+# License Terms — Resonant Cognition (Theory Repository)
 
 Copyright (c) 2026 John Devine. All rights reserved.
 
-This repository contains original theoretical frameworks, manuscripts, and simulation code for the "Resonant Cognition" and "Cosmological Architecture of Consciousness" paradigms created by John Devine.
+This repository holds the original formal papers and early simulation for the
+Resonant Cognition framework. It is dual-licensed by category:
 
-This repository is dual-licensed:
+1. Theory, documentation, and manuscripts — CC BY-NC-SA 4.0
+   (see below)
+2. Source code and simulation engine — All rights reserved, free for
+   non-commercial research use; commercial use requires a license from the
+   author
 
-1. **Documentation, Manuscripts, and Frameworks** are licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0)**.
-2. **Source Code, Scripts, and Simulation Engine** are licensed under the **PolyForm Noncommercial License 1.0.0**.
+For the full framework implementation (code, architecture notes, and test
+evidence), see: https://github.com/sg2john-cmd/solar-agent-system
 
 ---
 
-## 1. CC BY-NC-SA 4.0 (Documentation & Theoretical Frameworks)
+## 1. Theory & Documentation — CC BY-NC-SA 4.0
 
-Under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license, you are free to:
-* **Share:** Copy and redistribute the material in any medium or format.
-* **Adapt:** Remix, transform, and build upon the material.
+The papers in this repository are licensed under the Creative Commons
+Attribution-NonCommercial-ShareAlike 4.0 International License.
 
-Under the following conditions:
-* **Attribution:** You must give appropriate credit to John Devine, provide a link to the license, and indicate if changes were made.
-* **NonCommercial:** You may not use the material for commercial purposes.
-* **ShareAlike:** If you remix, transform, or build upon the material, you must distribute your contributions under the same CC BY-NC-SA 4.0 license as the original.
+You are free to:
+  Share — copy and redistribute the material in any medium or format
+  Adapt — remix, transform, and build upon the material
+
+Under the following terms:
+  Attribution — you must give appropriate credit (John Devine), provide a link
+                to the license, and indicate if changes were made.
+  NonCommercial — you may not use the material for commercial purposes.
+  ShareAlike — if you remix or transform the material, you must distribute your
+               contributions under the same or a compatible license.
 
 Full legal code: https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode
 
 ---
 
-## 2. PolyForm Noncommercial License 1.0.0 (Software Code)
+## 2. Source Code & Simulation Engine — All Rights Reserved
 
-Required Notice: Copyright (c) 2026 John Devine
+The simulation engine (resonant_simulation.html), the historical prototype
+scripts in this repository, and any other scripts here are copyright John
+Devine, all rights reserved.
 
-### Acceptance
-In order to get any license under these terms, you must agree to them as both strict obligations and conditions to all your licenses.
+You may:
+  - Use, study, test, and modify them for research, education, personal
+    projects, and other non-commercial purposes
+  - Share copies for the same non-commercial purposes with attribution to the
+    author
 
-### Copyright License
-The licensor grants you a copyright license for the software to do everything you might do with the software that would otherwise infringe the licensor's copyright in it for any permitted purpose. However, you may only distribute the software according to Distribution License and make changes or new works based on the software according to Changes and New Works License.
+You may NOT use them commercially — in products, paid services, SaaS, or any
+sold software — without a commercial license from the author. If you want to
+build something commercial on this work, that's not a no: it's an invitation
+to talk. Contact the author for terms.
 
-### Distribution License
-The licensor grants you an additional copyright license to distribute copies of the software. Your license to distribute covers distributing the software with changes and new works permittedYes, exactly. Because both licenses strictly prohibit commercial use, any company or individual wishing to use your frameworks or code for profit has no automated rights under these terms. If they attempt to monetize your work without reaching out, they would be committing copyright infringement. 
-
-To use your work commercially, they must contact you directly to negotiate a separate, customized commercial license (which usually involves agreed-upon licensing fees, royalties, or equity compensation).
-
-Regarding the text you provided, you are almost there, but there are two small structural cleanups needed before committing it to your repo.
-
----
-
-### **1. Important Correction: Section 2 Legal Text**
-
-In the text you pasted under **Section 2**, the legal paragraphs used are actually from the **MIT License**, not the **PolyForm Noncommercial 1.0.0 License**. 
-
-The MIT License allows anyone to use your code for commercial purposes without paying you, which directly contradicts your goal! To fix this, replace the text under Section 2 with the actual PolyForm non-commercial terms.
-
-### **2. Remove the Duplicate Copyright Header at the End**
-
-The very last two lines of your pasted text (`# Copyright (c) 2026 John Devine...`) were meant to be placed as a comment at the top of individual Python files (like `main.py`), rather than in the `LICENSE` file itself.
-
----
-
-### **Final Ready-to-Use `LICENSE` File**
-
-Copy and paste the cleaned block below directly into your repository's `LICENSE` file:
-
-```markdown
-# License Terms
-
-Copyright (c) 2026 John Devine. All rights reserved.
-
-This repository contains original theoretical frameworks, manuscripts, and simulation code for the "Resonant Cognition" and "Cosmological Architecture of Consciousness" paradigms created by John Devine.
-
-This repository is dual-licensed:
-
-1. **Documentation, Manuscripts, and Frameworks** are licensed under the **Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0)**.
-2. **Source Code, Scripts, and Simulation Engine** are licensed under the **PolyForm Noncommercial License 1.0.0**.
-
----
-
-## 1. CC BY-NC-SA 4.0 (Documentation & Theoretical Frameworks)
-
-Under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license, you are free to:
-* **Share:** Copy and redistribute the material in any medium or format.
-* **Adapt:** Remix, transform, and build upon the material.
-
-Under the following conditions:
-* **Attribution:** You must give appropriate credit to John Devine, provide a link to the license, and indicate if changes were made.
-* **NonCommercial:** You may not use the material for commercial purposes.
-* **ShareAlike:** If you remix, transform, or build upon the material, you must distribute your contributions under the same CC BY-NC-SA 4.0 license as the original.
-
-Full legal code: [https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode)
-
----
-
-## 2. PolyForm Noncommercial License 1.0.0 (Software Code)
-
-Required Notice: Copyright (c) 2026 John Devine
-
-### Noncommercial Purposes
-Any noncommercial purpose is a permitted purpose. Personal use for research, experiment, and testing for the benefit of public knowledge, personal study, private entertainment, hobby projects, or amateur pursuits, without any anticipated commercial application, is use for a permitted purpose.
-
-### Licensing Rights
-The licensor grants you a copyright and patent license for the software to run, copy, modify, distribute, and make new works based on the software strictly for permitted noncommercial purposes.
-
-### Notices
-You must ensure that anyone who gets a copy of any part of the software from you also gets a copy of these terms or the URL below, as well as the copyright notice above.
-
-### Commercial Inquiries
-Commercial use, monetization, or integration into proprietary software is strictly prohibited without an explicit commercial license granted by the author. To inquire about commercial licensing terms, please contact the author directly.
-
-Full legal text: [https://polyformproject.org/licenses/noncommercial/1.0.0/](https://polyformproject.org/licenses/noncommercial/1.0.0/)
+Contact: https://github.com/sg2john-cmd

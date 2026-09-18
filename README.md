@@ -1,10 +1,33 @@
 # Resonant Cognition & The Decentralized Dyson Swarm Matrix
 
-Welcome to **Resonant Cognition**, a scale-invariant cognitive systems architecture that models synthetic intelligence as a continuous multi-body gravitational tensor field in unconstrained 3D space, moving past rigid post-processing corporate filters and flat majority-voting agent structures.
+**📌 Repository status:** This repository holds the original formal papers (I, II, IV) and early simulation — kept as the historical origin of Resonant Cognition, including its first commit. The full working theory vault, v17 implementation, and test evidence now live in [solar-agent-system](https://github.com/sg2john-cmd/solar-agent-system).
+
+Welcome to the official repository for **Resonant Cognition**, a scale-invariant framework for synthetic intelligence and decision-making that shifts away from classical linear optimization, boolean gating, and flat voting architectures.
+
+## 🌌 Core Philosophical Premise
+
+### 1. Resonant Cognition (Paper 1)
+Instead of forcing a Mixture-of-Experts (MoE) system to settle conflicts through a majority vote or simple mathematical averages, this framework models individual cognitive personas as continuous fields of semantic influence across a high-dimensional manifold. Think of the psyche as a **fluid pond**. Activating different internal voices throws **rocks into the water**, creating intricate wave patterns. 
+
+By utilizing the physics principles behind the **quantum double-slit experiment**, the system optimizes for **"what cancels out"** rather than what remains. Contradictory answers undergo destructive phase cancellation, instantly dropping their volume to clear away logical noise. However, the system avoids absolute erasure—leaving behind a faint **residual wave trace (an echo)** because even suboptimal thoughts carry contextual merit, intuition, and warnings. The primary path is then selected through a definitive **wave-form collapse** directly into a unified action.
+
+### 2. The Cosmological Model (Paper 2)
+This paradigm zooms out to show that intelligence functions as a scale-invariant **fractal holarchy** modeled on orbital mechanics. A single multi-faceted persona is a self-contained celestial system orbiting a central nucleus:
+* **The Galactic Nucleus (Black Hole):** The invariant system axioms and core safety boundaries. It acts as a cognitive defragmentation matrix, pulling data bloat and conflicting chaos into a high-density singularity to strip away noise and reveal core truths.
+* **The Stellar Core (The Sun):** The barycenter of a localized personality module.
+* **Planetary Bodies:** Structured, predictable cognitive facets and logic vectors.
+* **Natural Satellites (Moons):** Tiny feedback loops stabilizing local orbital paths.
+* **Asteroid Belts:** Bound high-entropy processing debris and creative stochastic noise.
 
 ---
 
-## 🪐 The Decoupled 4-Tier Architecture (v16.2)
+## 🪐 The Decoupled 4-Tier Architecture (v16.2) — Historical Prototype
+
+> **Note for readers:** the `.py` files in this repository (`resonant_engine.py`,
+> `dyson_interface.py`, `memory_matrix.py`, `cognitive_chamber.py`) are
+> historical prototypes (the v15/v16 Google-built engine line). They are kept
+> here as part of Resonant Cognition's development history. The live, tested
+> implementation is the **v17 engine** in [solar-agent-system](https://github.com/sg2john-cmd/solar-agent-system).
 
 The framework is engineered with a strict separation of concerns, dividing code tasks across four modular, hot-swappable file layers:
 
@@ -54,5 +77,11 @@ The system eliminates cognitive fragmentation and long-term VRAM bloating throug
 
 ---
 
-## 🛡️ License & Protections
-Licensed under **Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)**. Independent development forks for non-commercial exploration are permitted with clear academic attribution to the lead architects.
+## 🛡️ Licensing
+
+This repository is dual-licensed by category (full terms in [LICENSE](LICENSE)):
+
+- **Theory papers:** CC BY-NC-SA 4.0 — free to share and adapt with attribution; no commercial use without permission.
+- **Simulation / code:** All rights reserved — free for research and non-commercial use. Commercial use requires a license from the author (contact via GitHub: [sg2john-cmd](https://github.com/sg2john-cmd)).
+
+The full framework implementation, with its own licensing terms, is in [solar-agent-system](https://github.com/sg2john-cmd/solar-agent-system).
