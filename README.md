@@ -1,6 +1,6 @@
 # Resonant Cognition & The Decentralized Dyson Swarm Matrix
 
-**📌 Repository status:** This repository holds the original formal papers (I, II, IV) and early simulation — kept as the historical origin of Resonant Cognition, including its first commit. The full working theory vault, v17 implementation, and test evidence now live in [solar-agent-system](https://github.com/sg2john-cmd/solar-agent-system).
+**📌 Repository status:** This repository holds the formal theory papers (I–V) and early simulation — kept as the historical origin of Resonant Cognition, including its first commit. The full working theory vault, v17 implementation, and test evidence now live in [solar-agent-system](https://github.com/sg2john-cmd/solar-agent-system).
 
 Welcome to the official repository for **Resonant Cognition**, a scale-invariant framework for synthetic intelligence and decision-making that shifts away from classical linear optimization, boolean gating, and flat voting architectures.
 
